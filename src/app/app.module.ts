@@ -16,6 +16,7 @@ import { AppComponent } from './app.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './login/login.component';
 import { UsersListComponent } from './users-list/users-list.component';
+import { FormateurListComponent } from './formateur-list/formateur-list.component';
 
 @NgModule({
   imports: [
@@ -33,7 +34,9 @@ import { UsersListComponent } from './users-list/users-list.component';
     AppComponent,
     AdminLayoutComponent,
     LoginComponent,
-    UsersListComponent
+    UsersListComponent,
+    FormateurListComponent,
+   
   ],
   providers: [],
   bootstrap: [AppComponent]
