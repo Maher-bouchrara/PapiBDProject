@@ -16,6 +16,8 @@ import { AppComponent } from './app.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './login/login.component';
 import { UsersListComponent } from './users-list/users-list.component';
+import { ParticipantListComponent } from './participant-list/participant-list.component';
+
 
 @NgModule({
   imports: [
@@ -27,13 +29,15 @@ import { UsersListComponent } from './users-list/users-list.component';
     FooterModule,
     SidebarModule,
     ReactiveFormsModule,
+
     AppRoutingModule
   ],
   declarations: [
     AppComponent,
     AdminLayoutComponent,
     LoginComponent,
-    UsersListComponent
+    UsersListComponent,
+    ParticipantListComponent
   ],
   providers: [],
   bootstrap: [AppComponent]
