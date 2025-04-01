@@ -18,6 +18,7 @@ import { LoginComponent } from './login/login.component';
 import { UsersListComponent } from './users-list/users-list.component';
 import { FormateurListComponent } from './formateur-list/formateur-list.component';
 import { FormationListeComponent } from './formation-liste/formation-liste.component';
+import { ParticipantListComponent } from './participant-list/participant-list.component';
 
 @NgModule({
   imports: [
@@ -29,6 +30,7 @@ import { FormationListeComponent } from './formation-liste/formation-liste.compo
     FooterModule,
     SidebarModule,
     ReactiveFormsModule,
+
     AppRoutingModule
   ],
   declarations: [
@@ -38,7 +40,7 @@ import { FormationListeComponent } from './formation-liste/formation-liste.compo
     UsersListComponent,
     FormateurListComponent,
     FormationListeComponent,
-   
+    ParticipantListComponent
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -11,6 +11,7 @@ export const ROUTES: RouteInfo[] = [
     { path: '/dashboard', title: 'Dashboard',  icon: 'pe-7s-graph', class: '' },
     { path: '/user', title: 'Mon Profile',  icon:'pe-7s-user', class: '' },
     { path: '/user-list', title: 'Les utilisateurs',  icon:'pe-7s-users', class: '' },
+    { path: '/participant-list', title: 'Les participants',  icon:'pe-7s-users', class: '' },
     { path: '/formateur-list', title: 'Les formateurs',  icon:'pe-7s-id', class: '' },
     { path: '/formation-liste', title: 'Les formations',  icon:'pe-7s-study', class: '' },
     // { path: '/table', title: 'Table List',  icon:'pe-7s-note2', class: '' },

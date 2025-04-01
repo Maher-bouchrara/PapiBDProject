@@ -12,12 +12,14 @@ import { UpgradeComponent } from '../../upgrade/upgrade.component';
 import { UsersListComponent } from 'app/users-list/users-list.component';
 import { FormateurListComponent } from 'app/formateur-list/formateur-list.component';
 import { FormationListeComponent } from 'app/formation-liste/formation-liste.component';
+import { ParticipantListComponent } from 'app/participant-list/participant-list.component';
 
 export const AdminLayoutRoutes: Routes = [
     { path: 'dashboard',      component: HomeComponent },
     { path: 'user',           component: UserComponent },
 
     { path: 'user-list',           component: UsersListComponent },
+    { path: 'participant-list',           component: ParticipantListComponent },
     { path: 'table',          component: TablesComponent },
     { path: 'typography',     component: TypographyComponent },
     { path: 'icons',          component: IconsComponent },
@@ -25,6 +27,7 @@ export const AdminLayoutRoutes: Routes = [
     { path: 'notifications',  component: NotificationsComponent },
     { path: 'upgrade',        component: UpgradeComponent },
     {path: 'formateur-list', component:FormateurListComponent},
-    {path: 'formation-liste', component:FormationListeComponent}
+    {path: 'formation-liste', component:FormationListeComponent},
+    { path: 'participant-list',           component: ParticipantListComponent },
 
 ];
