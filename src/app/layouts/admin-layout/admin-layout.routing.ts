@@ -11,6 +11,7 @@ import { NotificationsComponent } from '../../notifications/notifications.compon
 import { UpgradeComponent } from '../../upgrade/upgrade.component';
 import { UsersListComponent } from 'app/users-list/users-list.component';
 import { FormateurListComponent } from 'app/formateur-list/formateur-list.component';
+import { FormationListeComponent } from 'app/formation-liste/formation-liste.component';
 
 export const AdminLayoutRoutes: Routes = [
     { path: 'dashboard',      component: HomeComponent },
@@ -23,6 +24,7 @@ export const AdminLayoutRoutes: Routes = [
     { path: 'maps',           component: MapsComponent },
     { path: 'notifications',  component: NotificationsComponent },
     { path: 'upgrade',        component: UpgradeComponent },
-    {path: 'formateur-list', component:FormateurListComponent}
+    {path: 'formateur-list', component:FormateurListComponent},
+    {path: 'formation-liste', component:FormationListeComponent}
 
 ];

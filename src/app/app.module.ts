@@ -17,6 +17,7 @@ import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.compon
 import { LoginComponent } from './login/login.component';
 import { UsersListComponent } from './users-list/users-list.component';
 import { FormateurListComponent } from './formateur-list/formateur-list.component';
+import { FormationListeComponent } from './formation-liste/formation-liste.component';
 
 @NgModule({
   imports: [
@@ -36,6 +37,7 @@ import { FormateurListComponent } from './formateur-list/formateur-list.componen
     LoginComponent,
     UsersListComponent,
     FormateurListComponent,
+    FormationListeComponent,
    
   ],
   providers: [],
