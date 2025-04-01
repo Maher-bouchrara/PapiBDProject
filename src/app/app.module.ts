@@ -16,8 +16,9 @@ import { AppComponent } from './app.component';
 import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { LoginComponent } from './login/login.component';
 import { UsersListComponent } from './users-list/users-list.component';
+import { FormateurListComponent } from './formateur-list/formateur-list.component';
+import { FormationListeComponent } from './formation-liste/formation-liste.component';
 import { ParticipantListComponent } from './participant-list/participant-list.component';
-
 
 @NgModule({
   imports: [
@@ -37,6 +38,8 @@ import { ParticipantListComponent } from './participant-list/participant-list.co
     AdminLayoutComponent,
     LoginComponent,
     UsersListComponent,
+    FormateurListComponent,
+    FormationListeComponent,
     ParticipantListComponent
   ],
   providers: [],

@@ -6,11 +6,11 @@
                     <div class="header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h4 class="title">Liste des participants</h4>
-                                <p class="category">Gérer les participants</p>
+                                <h4 class="title">Liste des formateurs</h4>
+                                <p class="category">Gérer les formateurs</p>
                             </div>
                             <button class="btn btn-primary" (click)="openAddModal()">
-                                <i class="fa fa-plus"></i> Ajouter un participant
+                                <i class="fa fa-plus"></i> Ajouter un formateur
                             </button>
                         </div>
                     </div>
@@ -30,7 +30,7 @@
                                             <button type="button" class="btn btn-sm btn-info mr-2" (click)="openEditModal(i)">
                                                 <i class="fa fa-edit mr-1"></i> Modifier
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-danger" (click)="deleteUser(i)">
+                                            <button type="button" class="btn btn-sm btn-danger" (click)="deleteFormateur(i)">
                                                 <i class="fa fa-trash mr-1"></i> Supprimer
                                             </button>
                                         </div>
@@ -45,71 +45,63 @@
     </div>
 </div>
 
-<!-- Modal pour ajouter/modifier un utilisateur -->
-<div class="modal" [class.show]="showUserModal" [style.display]="showUserModal ? 'block' : 'none'" tabindex="-1" role="dialog">
+<!-- Modal pour ajouter/modifier un formateur -->
+<div class="modal" [class.show]="showFormateurModal" [style.display]="showFormateurModal ? 'block' : 'none'" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un utilisateur</h5>
-                <button type="button" class="close" (click)="closeUserModal()" aria-label="Close">
+                <h5 class="modal-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un formateur</h5>
+                <button type="button" class="close" (click)="closeFormateurModal()" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form [formGroup]="userForm">
+                <form [formGroup]="formateurForm">
                     <div class="form-group">
-                        <label for="userId">ID</label>
-                        <input type="text" class="form-control" id="userId" formControlName="id" [readonly]="isEditMode">
+                        <label for="formateurId">ID</label>
+                        <input type="text" class="form-control" id="formateurId" formControlName="id" [readonly]="isEditMode">
                     </div>
                     <div class="form-group">
-                        <label for="userName">Nom</label>
-                        <input type="text" class="form-control" id="userName" formControlName="name">
-                        <div *ngIf="userForm.get('name').invalid && (userForm.get('name').dirty || userForm.get('name').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('name').errors.required">Le nom est requis</div>
-                        </div>
+                        <label for="formateurNom">Nom</label>
+                        <input type="text" class="form-control" id="formateurNom" formControlName="nom">
                     </div>
                     <div class="form-group">
-                        <label for="userCountry">Pays</label>
-                        <input type="text" class="form-control" id="userCountry" formControlName="country">
-                        <div *ngIf="userForm.get('country').invalid && (userForm.get('country').dirty || userForm.get('country').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('country').errors.required">Le pays est requis</div>
-                        </div>
+                        <label for="formateurPrenom">Prénom</label>
+                        <input type="text" class="form-control" id="formateurPrenom" formControlName="prenom">
                     </div>
                     <div class="form-group">
-                        <label for="userCity">Ville</label>
-                        <input type="text" class="form-control" id="userCity" formControlName="city">
-                        <div *ngIf="userForm.get('city').invalid && (userForm.get('city').dirty || userForm.get('city').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('city').errors.required">La ville est requise</div>
-                        </div>
+                        <label for="formateurEmail">Email</label>
+                        <input type="email" class="form-control" id="formateurEmail" formControlName="email">
                     </div>
                     <div class="form-group">
-                        <label for="userCity">age</label>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>Open this select menu</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
-                          </select>
+                        <label for="formateurTel">Tel</label>
+                        <input type="text" class="form-control" id="formateurTel" formControlName="tel">
+                    </div>
+                  
+                    <div class="form-group">
+                        <label for="formateurType">Type</label>
+                        <select class="form-control" id="formateurType" formControlName="type">
+                            <option *ngFor="let type of types" [value]="type">{{ type }}</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="userSalary">Salaire</label>
-                        <input type="text" class="form-control" id="userSalary" formControlName="salary">
-                        <div *ngIf="userForm.get('salary').invalid && (userForm.get('salary').dirty || userForm.get('salary').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('salary').errors.required">Le salaire est requis</div>
-                        </div>
+                        <label for="formateurEmployeur">Employeur</label>
+                        <select class="form-control" id="formateurEmployeur" formControlName="employeur">
+                            <option *ngFor="let employeur of employeurs" [value]="employeur">{{ employeur }}</option>
+                        </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeUserModal()">Annuler</button>
-                <button type="button" class="btn btn-primary" [disabled]="userForm.invalid" (click)="saveUser()">
+                <button type="button" class="btn btn-secondary" (click)="closeFormateurModal()">Annuler</button>
+                <button type="button" class="btn btn-primary" [disabled]="formateurForm.invalid" (click)="saveFormateur()">
                     {{ isEditMode ? 'Modifier' : 'Ajouter' }}
                 </button>
             </div>
         </div>
     </div>
 </div>
-<div class="modal-backdrop fade show" *ngIf="showUserModal"></div>
+<div class="modal-backdrop fade show" *ngIf="showFormateurModal"></div>
 
 <!-- Modal de confirmation pour la suppression -->
 <div class="modal" [class.show]="showDeleteModal" [style.display]="showDeleteModal ? 'block' : 'none'" tabindex="-1" role="dialog">
@@ -122,10 +114,10 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur?</p>
-                <p *ngIf="selectedUser">
-                    <strong>Nom:</strong> {{ selectedUser[1] }}<br>
-                    <strong>ID:</strong> {{ selectedUser[0] }}
+                <p>Êtes-vous sûr de vouloir supprimer ce formateur?</p>
+                <p *ngIf="selectedFormateur">
+                    <strong>Nom:</strong> {{ selectedFormateur[1] }}<br>
+                    <strong>ID:</strong> {{ selectedFormateur[0] }}
                 </p>
             </div>
             <div class="modal-footer">
