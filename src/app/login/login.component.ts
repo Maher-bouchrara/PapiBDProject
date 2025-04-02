@@ -1,7 +1,7 @@
 // login.component.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { AuthService } from 'app/services/auth.service';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -12,23 +12,22 @@ export class LoginComponent {
   password: string = '';
   rememberMe: boolean = false;
 
-  constructor(private router: Router) {}
+  credentials = {
+    login: '',
+    motDePasse: ''
+  };
+
+  constructor(private authService: AuthService, private router: Router) {}
 
   onLogin() {
-    // Ici, vous ajouterez votre logique d'authentification
-    // Par exemple, appel à un service d'authentification
-    
-    console.log('Tentative de connexion avec:', {
-      username: this.username,
-      password: '********', // Ne pas logger les mots de passe en production
-      rememberMe: this.rememberMe
+    this.authService.login(this.credentials).subscribe({
+      next: (response) => {
+        localStorage.setItem('token', response.token);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Login failed:', err);
+      }
     });
-
-    // Simulation d'une authentification réussie
-    // À remplacer par votre véritable logique d'authentification
-    if (this.username && this.password) {
-      // Redirection vers la page d'accueil après connexion
-      this.router.navigate(['/dashboard']);
-    }
   }
 }

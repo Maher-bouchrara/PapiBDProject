@@ -13,21 +13,22 @@ import { UsersListComponent } from 'app/users-list/users-list.component';
 import { FormateurListComponent } from 'app/formateur-list/formateur-list.component';
 import { FormationListeComponent } from 'app/formation-liste/formation-liste.component';
 import { ParticipantListComponent } from 'app/participant-list/participant-list.component';
+import { AuthGuard } from 'app/guards/auth.guard';
 
 export const AdminLayoutRoutes: Routes = [
-    { path: 'dashboard',      component: HomeComponent },
-    { path: 'user',           component: UserComponent },
+    { path: 'dashboard',      component: HomeComponent ,canActivate: [AuthGuard]},
+    { path: 'user',           component: UserComponent  ,canActivate: [AuthGuard]},
 
-    { path: 'user-list',           component: UsersListComponent },
-    { path: 'participant-list',           component: ParticipantListComponent },
-    { path: 'table',          component: TablesComponent },
-    { path: 'typography',     component: TypographyComponent },
-    { path: 'icons',          component: IconsComponent },
-    { path: 'maps',           component: MapsComponent },
-    { path: 'notifications',  component: NotificationsComponent },
-    { path: 'upgrade',        component: UpgradeComponent },
-    {path: 'formateur-list', component:FormateurListComponent},
-    {path: 'formation-liste', component:FormationListeComponent},
-    { path: 'participant-list',           component: ParticipantListComponent },
+    { path: 'user-list',           component: UsersListComponent  ,canActivate: [AuthGuard]},
+    { path: 'participant-list',           component: ParticipantListComponent  ,canActivate: [AuthGuard]},
+    { path: 'table',          component: TablesComponent  ,canActivate: [AuthGuard]},
+    { path: 'typography',     component: TypographyComponent  ,canActivate: [AuthGuard]},
+    { path: 'icons',          component: IconsComponent  ,canActivate: [AuthGuard]},
+    { path: 'maps',           component: MapsComponent  ,canActivate: [AuthGuard]},
+    { path: 'notifications',  component: NotificationsComponent  ,canActivate: [AuthGuard]},
+    { path: 'upgrade',        component: UpgradeComponent  ,canActivate: [AuthGuard]},
+    {path: 'formateur-list', component:FormateurListComponent ,canActivate: [AuthGuard]},
+    {path: 'formation-liste', component:FormationListeComponent ,canActivate: [AuthGuard]},
+    { path: 'participant-list',           component: ParticipantListComponent  ,canActivate: [AuthGuard]},
 
 ];
