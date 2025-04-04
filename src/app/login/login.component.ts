@@ -2,6 +2,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/services/auth.service';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -26,8 +27,27 @@ export class LoginComponent {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        console.error('Login failed:', err);
-      }
+        if (err.status === 500 || err.status === 0) {
+          // Erreur serveur ou backend non joignable
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur serveur',
+            text: 'Veuillez réessayer plus tard.',
+            confirmButtonColor: '#d82c2c',
+            confirmButtonText:"réessayer"
+          });
+        } else {
+          // Erreur d’identifiants (ex : exception Runtime côté backend)
+          Swal.fire({
+            icon: 'warning',
+            title: 'Identifiants invalides',
+            text: "Nom d'utilisateur ou mot de passe incorrect.",
+            confirmButtonColor: '#d82c2c',
+            confirmButtonText:"réessayer",
+            
+           
+          });
+        }
+      },
     });
-  }
-}
+  }}
