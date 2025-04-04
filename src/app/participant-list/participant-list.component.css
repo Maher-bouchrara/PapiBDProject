@@ -49,3 +49,8 @@
 .header .btn-primary i {
     margin-right: 8px;
 }
+
+.modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+}

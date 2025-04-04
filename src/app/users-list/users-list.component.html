@@ -62,49 +62,32 @@
                         <input type="text" class="form-control" id="userId" formControlName="id" [readonly]="isEditMode">
                     </div>
                     <div class="form-group">
-                        <label for="userName">Nom</label>
-                        <input type="text" class="form-control" id="userName" formControlName="name">
-                        <div *ngIf="userForm.get('name').invalid && (userForm.get('name').dirty || userForm.get('name').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('name').errors.required">Le nom est requis</div>
+                        <label for="userLogin">Nom d'utilisateur</label>
+                        <input type="text" class="form-control" id="userLogin" formControlName="login">
+                        <div *ngIf="userForm.get('login').invalid && (userForm.get('login').dirty || userForm.get('login').touched)" class="text-danger">
+                            <div *ngIf="userForm.get('login').errors?.required">Le nom est requis</div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="userCountry">Pays</label>
-                        <input type="text" class="form-control" id="userCountry" formControlName="country">
-                        <div *ngIf="userForm.get('country').invalid && (userForm.get('country').dirty || userForm.get('country').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('country').errors.required">Le pays est requis</div>
+                        <label for="userPassword">Mot de passe</label>
+                        <input type="text" class="form-control" id="userPassword" formControlName="motDePasse">
+                        <div *ngIf="userForm.get('motDePasse').invalid && (userForm.get('motDePasse').dirty || userForm.get('motDePasse').touched)" class="text-danger">
+                            <div *ngIf="userForm.get('motDePasse').errors?.required">Le mot de passe est requis</div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="userCity">Ville</label>
-                        <input type="text" class="form-control" id="userCity" formControlName="city">
-                        <div *ngIf="userForm.get('city').invalid && (userForm.get('city').dirty || userForm.get('city').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('city').errors.required">La ville est requise</div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="userCity">age</label>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>Open this select menu</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
-                          </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="userSalary">Salaire</label>
-                        <input type="text" class="form-control" id="userSalary" formControlName="salary">
-                        <div *ngIf="userForm.get('salary').invalid && (userForm.get('salary').dirty || userForm.get('salary').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('salary').errors.required">Le salaire est requis</div>
-                        </div>
-                    </div>
+                        <label for="utilisateurRole">Role</label>
+                        <select class="form-control" id="role" formControlName="role">
+                            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                        </select>
+                    </div> 
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeUserModal()">Annuler</button>
-                <button type="button" class="btn btn-primary" [disabled]="userForm.invalid" (click)="saveUser()">
-                    {{ isEditMode ? 'Modifier' : 'Ajouter' }}
-                </button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="closeUserModal()">Annuler</button>
+                    <button type="button" class="btn btn-primary" [disabled]="userForm.invalid" (click)="saveUser()">
+                        {{ isEditMode ? 'Modifier' : 'Ajouter' }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -122,9 +105,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur?</p>
+                <p>Êtes-vous sûr de vouloir supprimer cet utilisateur ?</p>
                 <p *ngIf="selectedUser">
-                    <strong>Nom:</strong> {{ selectedUser[1] }}<br>
+                    <strong>Nom d'utilisateur:</strong> {{ selectedUser[1] }}<br>
                     <strong>ID:</strong> {{ selectedUser[0] }}
                 </p>
             </div>

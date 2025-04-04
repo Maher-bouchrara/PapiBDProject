@@ -12,55 +12,55 @@ declare interface TableData {
   styleUrls: ['./participant-list.component.css']
 })
 export class ParticipantListComponent implements OnInit {
-    public tableData1: TableData;
-    public userForm: FormGroup;
-    public isEditMode: boolean = false;
-    public selectedUserIndex: number = -1;
-    public selectedUser: string[] = null;
+  public tableData1: TableData;
+  public userForm: FormGroup;
+  public isEditMode: boolean = false;
+  public selectedUserIndex: number = -1;
+  public selectedUser: string[] = null;
 
-    // Variables pour contrôler l'affichage des modals
-    public showUserModal: boolean = false;
-    public showDeleteModal: boolean = false;
+  public showUserModal: boolean = false;
+  public showDeleteModal: boolean = false;
 
-  constructor(private formBuilder: FormBuilder) { }
+  structures = ['Direction centrale', 'Direction régionale'];
+  profiles = ['Informaticien', 'Technicien', 'Juriste', 'Gestionnaire'];
+
+  constructor(private formBuilder: FormBuilder) {}
 
   ngOnInit() {
     this.tableData1 = {
-      headerRow: ['ID', 'Name', 'Country', 'City', 'Salary'],
+      headerRow: ['ID', 'Nom', 'Prénom', 'Structure', 'Profil', 'Email', 'Téléphone'],
       dataRows: [
-        ['1', 'Dakota Rice', 'Niger', 'Oud-Turnhout', '$36,738'],
-        ['2', 'Minerva Hooper', 'Curaçao', 'Sinaai-Waas', '$23,789'],
-        // ... autres données
+        ['1', 'Ahmed', 'Ben Ali', 'Direction centrale', 'Informaticien', 'ahmed@example.com', '12345678'],
+        ['2', 'Sana', 'Trabelsi', 'Direction régionale', 'Juriste', 'sana@example.com', '87654321'],
       ]
     };
 
     this.initForm();
   }
+
   initForm() {
     this.userForm = this.formBuilder.group({
       id: ['', Validators.required],
-      name: ['', Validators.required],
-      country: ['', Validators.required],
-      city: ['', Validators.required],
-      salary: ['', Validators.required]
+      nom: ['', Validators.required],
+      prenom: ['', Validators.required],
+      structure: ['', Validators.required],
+      profile: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      telephone: ['', [Validators.required, Validators.pattern('^[0-9]{8}$')]]
     });
   }
+
   openAddModal() {
     this.isEditMode = false;
     this.selectedUserIndex = -1;
-    
-    // Generate a new ID
-    const nextId = (Math.max(...this.tableData1.dataRows.map(row => parseInt(row[0]))) + 1).toString();
-    
+
+    const nextId = (
+      Math.max(...this.tableData1.dataRows.map(row => parseInt(row[0]))) + 1
+    ).toString();
+
     this.userForm.reset();
-    this.userForm.patchValue({
-      id: nextId,
-      name: '',
-      country: '',
-      city: '',
-      salary: ''
-    });
-    
+    this.userForm.patchValue({ id: nextId });
+
     this.showUserModal = true;
   }
 
@@ -68,41 +68,40 @@ export class ParticipantListComponent implements OnInit {
     this.isEditMode = true;
     this.selectedUserIndex = index;
     const userData = this.tableData1.dataRows[index];
-    
+
     this.userForm.patchValue({
       id: userData[0],
-      name: userData[1],
-      country: userData[2],
-      city: userData[3],
-      salary: userData[4]
+      nom: userData[1],
+      prenom: userData[2],
+      structure: userData[3],
+      profile: userData[4],
+      email: userData[5],
+      telephone: userData[6]
     });
-    
+
     this.showUserModal = true;
   }
 
   saveUser() {
-    if (this.userForm.invalid) {
-      return;
-    }
-    
+    if (this.userForm.invalid) return;
+
     const formValues = this.userForm.value;
     const userData = [
       formValues.id,
-      formValues.name,
-      formValues.country,
-      formValues.city,
-      formValues.salary
+      formValues.nom,
+      formValues.prenom,
+      formValues.structure,
+      formValues.profile,
+      formValues.email,
+      formValues.telephone
     ];
-    
+
     if (this.isEditMode) {
-      // Update existing user
       this.tableData1.dataRows[this.selectedUserIndex] = userData;
     } else {
-      // Add new user
       this.tableData1.dataRows.push(userData);
     }
-    
-    // Close modal
+
     this.showUserModal = false;
     this.userForm.reset();
   }
@@ -114,10 +113,7 @@ export class ParticipantListComponent implements OnInit {
   }
 
   confirmDelete() {
-    // Remove user from array
     this.tableData1.dataRows.splice(this.selectedUserIndex, 1);
-    
-    // Close modal
     this.showDeleteModal = false;
     this.selectedUserIndex = -1;
     this.selectedUser = null;

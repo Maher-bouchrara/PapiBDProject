@@ -17,6 +17,7 @@ export class UsersListComponent implements OnInit {
   public isEditMode: boolean = false;
   public selectedUserIndex: number = -1;
   public selectedUser: string[] = null;
+  roles: string[]=['Admin','Responsable','Utilisateur']
   
   // Variables pour contrôler l'affichage des modals
   public showUserModal: boolean = false;
@@ -26,10 +27,10 @@ export class UsersListComponent implements OnInit {
 
   ngOnInit() {
     this.tableData1 = {
-      headerRow: ['ID', 'Name', 'Country', 'City', 'Salary'],
+      headerRow: ['ID', "Nom d'utilisateur", 'mot de passe', 'Role'],
       dataRows: [
-        ['1', 'Dakota Rice', 'Niger', 'Oud-Turnhout', '$36,738'],
-        ['2', 'Minerva Hooper', 'Curaçao', 'Sinaai-Waas', '$23,789'],
+        ['1', 'imen', 'sgfbzebgzuneazbaz', 'Admin'],
+        ['2', 'maher', 'sgfbzebgzuneazbaz', 'Responsable'],
         // ... autres données
       ]
     };
@@ -40,10 +41,10 @@ export class UsersListComponent implements OnInit {
   initForm() {
     this.userForm = this.formBuilder.group({
       id: ['', Validators.required],
-      name: ['', Validators.required],
-      country: ['', Validators.required],
-      city: ['', Validators.required],
-      salary: ['', Validators.required]
+      login: ['', Validators.required],
+      motDePasse: ['', Validators.required],
+      role: ['', Validators.required],
+      
     });
   }
 
@@ -57,10 +58,10 @@ export class UsersListComponent implements OnInit {
     this.userForm.reset();
     this.userForm.patchValue({
       id: nextId,
-      name: '',
-      country: '',
-      city: '',
-      salary: ''
+      login: '',
+      motDePasse: '',
+      role: '',
+     
     });
     
     this.showUserModal = true;
@@ -73,10 +74,10 @@ export class UsersListComponent implements OnInit {
     
     this.userForm.patchValue({
       id: userData[0],
-      name: userData[1],
-      country: userData[2],
-      city: userData[3],
-      salary: userData[4]
+      login: userData[1],
+      motDePasse: userData[2],
+      role: userData[3],
+      
     });
     
     this.showUserModal = true;
@@ -90,10 +91,10 @@ export class UsersListComponent implements OnInit {
     const formValues = this.userForm.value;
     const userData = [
       formValues.id,
-      formValues.name,
-      formValues.country,
-      formValues.city,
-      formValues.salary
+      formValues.login,
+      formValues.motDePasse,
+      formValues.role,
+     
     ];
     
     if (this.isEditMode) {

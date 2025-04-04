@@ -50,7 +50,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un utilisateur</h5>
+                <h5 class="modal-title">{{ isEditMode ? 'Modifier' : 'Ajouter' }} un participant</h5>
                 <button type="button" class="close" (click)="closeUserModal()" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -63,40 +63,34 @@
                     </div>
                     <div class="form-group">
                         <label for="userName">Nom</label>
-                        <input type="text" class="form-control" id="userName" formControlName="name">
-                        <div *ngIf="userForm.get('name').invalid && (userForm.get('name').dirty || userForm.get('name').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('name').errors.required">Le nom est requis</div>
+                        <input type="text" class="form-control" id="userName" formControlName="nom">
+                        <div *ngIf="userForm.get('nom').invalid && (userForm.get('nom').dirty || userForm.get('nom').touched)" class="text-danger">
+                            <div *ngIf="userForm.get('nom').errors.required">Le nom est requis</div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="userCountry">Pays</label>
-                        <input type="text" class="form-control" id="userCountry" formControlName="country">
-                        <div *ngIf="userForm.get('country').invalid && (userForm.get('country').dirty || userForm.get('country').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('country').errors.required">Le pays est requis</div>
-                        </div>
+                        <label for="participantPrenom">Prénom</label>
+                        <input type="text" class="form-control" id="participantPrenom" formControlName="prenom">
                     </div>
                     <div class="form-group">
-                        <label for="userCity">Ville</label>
-                        <input type="text" class="form-control" id="userCity" formControlName="city">
-                        <div *ngIf="userForm.get('city').invalid && (userForm.get('city').dirty || userForm.get('city').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('city').errors.required">La ville est requise</div>
-                        </div>
+                        <label for="participantStructure">structure</label>
+                        <select class="form-control" id="participantStructure" formControlName="structure">
+                            <option *ngFor="let structure of structures" [value]="structure">{{ structure }}</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="userCity">age</label>
-                        <select class="form-select" aria-label="Default select example">
-                            <option selected>Open this select menu</option>
-                            <option value="1">One</option>
-                            <option value="2">Two</option>
-                            <option value="3">Three</option>
-                          </select>
+                        <label for="participantProfile">profile</label>
+                        <select class="form-control" id="participantProfile" formControlName="profile">
+                            <option *ngFor="let profile of profiles" [value]="profile">{{ profile }}</option>
+                        </select>
                     </div>
                     <div class="form-group">
-                        <label for="userSalary">Salaire</label>
-                        <input type="text" class="form-control" id="userSalary" formControlName="salary">
-                        <div *ngIf="userForm.get('salary').invalid && (userForm.get('salary').dirty || userForm.get('salary').touched)" class="text-danger">
-                            <div *ngIf="userForm.get('salary').errors.required">Le salaire est requis</div>
-                        </div>
+                        <label for="participantEmail">Email</label>
+                        <input type="email" class="form-control" id="participantEmail" formControlName="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="participantTel">Telephone</label>
+                        <input type="text" class="form-control" id="participantTelephone" formControlName="telephone">
                     </div>
                 </form>
             </div>
