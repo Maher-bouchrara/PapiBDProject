@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UserListService } from 'app/services/user-list.service'; 
 
 declare interface TableData {
   headerRow: string[];
@@ -13,6 +14,7 @@ declare interface TableData {
 })
 export class UsersListComponent implements OnInit {
   public tableData1: TableData;
+  public users : any;
   public userForm: FormGroup;
   public isEditMode: boolean = false;
   public selectedUserIndex: number = -1;
@@ -23,17 +25,31 @@ export class UsersListComponent implements OnInit {
   public showUserModal: boolean = false;
   public showDeleteModal: boolean = false;
 
-  constructor(private formBuilder: FormBuilder) { }
+  constructor(private formBuilder: FormBuilder , private userService: UserListService) { }
 
   ngOnInit() {
+    let data: string[][] = [];
+    this.userService.getAllUsers().subscribe({
+      next: (res) => {
+        console.log('Users fetched:', res);
+        this.users = res ;
+        data = res.map((user: any) => [String(user.id),String("********"),String(user.login),String(user.role.nom)]);
+        console.log("data = ",data);
+        },
+      error: (err) => {
+        console.error('Error fetching users:', err);
+      },
+      complete: () => {
+        console.log('User fetching completed.');
+      }
+    });
+
     this.tableData1 = {
       headerRow: ['ID', "Nom d'utilisateur", 'mot de passe', 'Role'],
-      dataRows: [
-        ['1', 'imen', 'sgfbzebgzuneazbaz', 'Admin'],
-        ['2', 'maher', 'sgfbzebgzuneazbaz', 'Responsable'],
-        // ... autres données
-      ]
+      dataRows: data
     };
+  
+
 
     this.initForm();
   }
