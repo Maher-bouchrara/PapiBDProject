@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit ,AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserListService } from 'app/services/user-list.service'; 
 
@@ -19,8 +19,12 @@ export class UsersListComponent implements OnInit {
   public isEditMode: boolean = false;
   public selectedUserIndex: number = -1;
   public selectedUser: string[] = null;
-  roles: string[]=['Admin','Responsable','Utilisateur']
-  
+  roles: any[] = [
+    { id: 1, name: 'Admin' },
+    { id: 2, name: 'Responsable' },
+    { id: 3, name: 'Simple utilisateur' }
+  ];
+    
   // Variables pour contrôler l'affichage des modals
   public showUserModal: boolean = false;
   public showDeleteModal: boolean = false;
@@ -53,12 +57,16 @@ export class UsersListComponent implements OnInit {
 
     this.initForm();
   }
-
+  
+  ngAfterViewInit(){
+    this.loadUsers();
+  }
   initForm() {
     this.userForm = this.formBuilder.group({
       id: ['', Validators.required],
       login: ['', Validators.required],
       motDePasse: ['', Validators.required],
+      email: ['', Validators.required],
       role: ['', Validators.required],
       
     });
@@ -76,6 +84,7 @@ export class UsersListComponent implements OnInit {
       id: nextId,
       login: '',
       motDePasse: '',
+      email:'',
       role: '',
      
     });
@@ -86,13 +95,14 @@ export class UsersListComponent implements OnInit {
   openEditModal(index: number) {
     this.isEditMode = true;
     this.selectedUserIndex = index;
-    const userData = this.tableData1.dataRows[index];
+    const userData = this.users[index];
     
     this.userForm.patchValue({
-      id: userData[0],
-      login: userData[1],
-      motDePasse: userData[2],
-      role: userData[3],
+      id: userData.id,
+      login: userData.login,
+      motDePasse: userData.motdePasse,
+      email: userData.email,
+      role: userData.role.id,
       
     });
     
@@ -101,24 +111,45 @@ export class UsersListComponent implements OnInit {
 
   saveUser() {
     if (this.userForm.invalid) {
-      return;
+      console.log("unvalid");   
     }
     
     const formValues = this.userForm.value;
-    const userData = [
-      formValues.id,
-      formValues.login,
-      formValues.motDePasse,
-      formValues.role,
-     
-    ];
-    
+    const roleId = formValues.role; // This will contain the selected role ID
+    const userData: any = {
+      login: formValues.login,
+      motdePasse : formValues.motDePasse,
+      email : formValues.email,
+    }  ;
+
+    console.log("userData:",userData);
+    console.log("isEditMode:",this.isEditMode);
+
     if (this.isEditMode) {
       // Update existing user
-      this.tableData1.dataRows[this.selectedUserIndex] = userData;
+      this.userService.updateUser(formValues.id, userData, roleId).subscribe({
+        next: (updatedUser) => {
+          console.log('User updated:', updatedUser);
+          this.loadUsers(); // Refresh the user list
+          this.showUserModal = false;
+        },
+        error: (err) => {
+          console.error('Error updating user:', err);
+        }
+      });
     } else {
       // Add new user
-      this.tableData1.dataRows.push(userData);
+      this.userService.createUser(userData, roleId).subscribe({
+        next: (createdUser) => {
+          console.log('User created:', createdUser);
+          this.loadUsers(); // Refresh the user list
+          this.showUserModal = false;
+        },
+        error: (err) => {
+          console.error('Error creating user:', err);
+        }
+      });
+
     }
     
     // Close modal
@@ -126,20 +157,48 @@ export class UsersListComponent implements OnInit {
     this.userForm.reset();
   }
 
+  // Add this method to refresh user data
+  loadUsers() {
+    this.userService.getAllUsers().subscribe({
+      next: (res) => {
+        console.log('Users fetched:', res);
+        this.users = res;
+        this.tableData1.dataRows = res.map((user: any) => [
+          String(user.id),
+          String(user.login),
+          String("********"),
+          String(user.role.nom),
+          String(user.email)
+        ]);
+      },
+      error: (err) => {
+        console.error('Error fetching users:', err);
+      }
+    });
+  }
+
   deleteUser(index: number) {
     this.selectedUserIndex = index;
     this.selectedUser = this.tableData1.dataRows[index];
+    console.log("selectedUser!",this.selectedUser);
     this.showDeleteModal = true;
   }
 
   confirmDelete() {
-    // Remove user from array
-    this.tableData1.dataRows.splice(this.selectedUserIndex, 1);
+    const userId = this.selectedUser[0]; // Assuming ID is the first element
     
-    // Close modal
-    this.showDeleteModal = false;
-    this.selectedUserIndex = -1;
-    this.selectedUser = null;
+    this.userService.deleteUser(userId).subscribe({
+      next: () => {
+        this.loadUsers();
+        // Close modal
+        this.showDeleteModal = false;
+        this.selectedUserIndex = -1;
+        this.selectedUser = null;
+      },
+      error: (err) => {
+        console.error('Error deleting user:', err);
+      }
+    });
   }
 
   closeUserModal() {
