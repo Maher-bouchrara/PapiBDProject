@@ -18,6 +18,13 @@ export class UsersListComponent implements OnInit {
   public userForm: FormGroup;
   public isEditMode: boolean = false;
   public selectedUserIndex: number = -1;
+
+  // Pagination
+  public filteredUsers: any[] = [];
+  public pageSize: number = 5;
+  public currentPage: number = 1;
+  // fin -  Pagination
+
   public selectedUser: string[] = null;
   roles: any[] = [
     { id: 1, name: 'Admin' },
@@ -32,6 +39,10 @@ export class UsersListComponent implements OnInit {
   constructor(private formBuilder: FormBuilder , private userService: UserListService) { }
 
   ngOnInit() {
+    // Pagination
+    const savedPage = localStorage.getItem('usersListCurrentPage');
+    this.currentPage = savedPage ? parseInt(savedPage) : 1; 
+    // Fin - Pagination
     let data: string[][] = [];
     this.userService.getAllUsers().subscribe({
       next: (res) => {
@@ -157,12 +168,21 @@ export class UsersListComponent implements OnInit {
     this.userForm.reset();
   }
 
+  ngOnDestroy() {
+    // Save current page when component is destroyed
+    localStorage.setItem('usersListCurrentPage', this.currentPage.toString());
+  }
+
   // Add this method to refresh user data
   loadUsers() {
     this.userService.getAllUsers().subscribe({
       next: (res) => {
         console.log('Users fetched:', res);
         this.users = res;
+        // Pagination
+        this.filteredUsers = res;
+        // this.currentPage = 1; // Reset to first page
+        // Fin - Pagination
         this.tableData1.dataRows = res.map((user: any) => [
           String(user.id),
           String(user.login),
@@ -177,6 +197,25 @@ export class UsersListComponent implements OnInit {
     });
   }
 
+  onSearchChange(searchTerm: string) {
+    this.filteredUsers = this.users.filter(user =>
+      user.login.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    this.currentPage = 1;
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    localStorage.setItem('usersListCurrentPage', page.toString());
+
+  }
+  
+  paginatedUsers() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.filteredUsers.slice(startIndex, startIndex + this.pageSize);
+  }
+  
   deleteUser(index: number) {
     this.selectedUserIndex = index;
     this.selectedUser = this.tableData1.dataRows[index];

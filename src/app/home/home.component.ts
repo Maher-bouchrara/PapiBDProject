@@ -9,6 +9,13 @@ import * as Chartist from 'chartist';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+
+    // Nouveaux compteurs
+    public participantsCount: number = 0;
+    public formateursCount: number = 0;
+    public formationsCount: number = 0;
+    public utilisateursCount: number = 0;
+    
     public emailChartType: ChartType;
     public emailChartData: any;
     public emailChartLegendItems: LegendItem[];
