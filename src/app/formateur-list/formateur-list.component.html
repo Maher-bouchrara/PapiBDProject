@@ -29,6 +29,7 @@
                                     <td>{{formateur.prenom}}</td>
                                     <td>{{formateur.email}}</td>
                                     <td>{{formateur.tel}}</td>
+                                    <td>{{formateur.type}}</td>
                                     <td>{{formateur.employeur.nomEmployeur}}</td>
 
                                     <td>
@@ -93,8 +94,10 @@
                     <div class="form-group">
                         <label for="formateurEmployeur">Employeur</label>
                         <select class="form-control" id="formateurEmployeur" formControlName="employeur">
-                            <option *ngFor="let employeur of employeurs" [value]="employeur">{{ employeur }}</option>
-                        </select>
+                            <option *ngFor="let employeur of employeurs" [value]="employeur.id">
+                              {{ employeur.nomEmployeur }}
+                            </option>
+                          </select>
                     </div>
                 </form>
             </div>
