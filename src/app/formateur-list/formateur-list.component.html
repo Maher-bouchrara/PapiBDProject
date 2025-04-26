@@ -23,8 +23,14 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let row of tableData1.dataRows; let i = index">
-                                    <td *ngFor="let cell of row">{{cell}}</td>
+                                <tr *ngFor="let formateur of this.formateurs; let i = index">
+                                    <td>{{formateur.id}}</td>
+                                    <td>{{formateur.nom}}</td>
+                                    <td>{{formateur.prenom}}</td>
+                                    <td>{{formateur.email}}</td>
+                                    <td>{{formateur.tel}}</td>
+                                    <td>{{formateur.employeur.nomEmployeur}}</td>
+
                                     <td>
                                         <div class="d-flex justify-content-start gap-2">
                                             <button type="button" class="btn btn-sm btn-info mr-2" (click)="openEditModal(i)">
@@ -57,10 +63,10 @@
             </div>
             <div class="modal-body">
                 <form [formGroup]="formateurForm">
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="formateurId">ID</label>
                         <input type="text" class="form-control" id="formateurId" formControlName="id" [readonly]="isEditMode">
-                    </div>
+                    </div> -->
                     <div class="form-group">
                         <label for="formateurNom">Nom</label>
                         <input type="text" class="form-control" id="formateurNom" formControlName="nom">

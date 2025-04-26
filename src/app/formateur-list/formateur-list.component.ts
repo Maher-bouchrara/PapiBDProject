@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormateurListService } from 'app/services/formateur-list.service'; 
+
 
 declare interface TableData {
   headerRow: string[];
@@ -13,6 +15,7 @@ declare interface TableData {
 })
 export class FormateurListComponent implements OnInit {
   public tableData1: TableData;
+  public formateurs : any;
   public formateurForm: FormGroup;
   public isEditMode: boolean = false;
   public selectedFormateurIndex: number = -1;
@@ -23,20 +26,40 @@ export class FormateurListComponent implements OnInit {
   public showDeleteModal: boolean = false;
   employeurs: string[] = ['Entreprise A', 'Entreprise B', 'Entreprise C', 'Freelance'];
   types: string[]=['interne','externe']
-  constructor(private formBuilder: FormBuilder) { }
+  constructor(private formBuilder: FormBuilder , private formateurService:FormateurListService) { }
 
   ngOnInit() {
+    let data: string[][] = [];
+    this.formateurService.getAllFormateurs().subscribe({
+      next: (res) => {
+        console.log('Formateurs fetched:', res);
+        this.formateurs = res;
+        data = res.map((formateur: any) => [
+          String(formateur.id),
+          String(formateur.nom),
+          String(formateur.prenom),
+          String(formateur.email),
+          String(formateur.tel),
+          String(formateur.employeur )
+        ]);
+        console.log("data = ", data);
+      },
+      error: (err) => {
+        console.error('Error fetching formateurs:', err);
+      },
+      complete: () => {
+        console.log('Formateur fetching completed.');
+      }
+    });
+  
     this.tableData1 = {
-      headerRow: ['ID', 'Nom', 'Prénom', 'Email', 'Tel', 'Type', 'Employeur'],
-      dataRows: [
-        ['1', 'Dakota', 'Rice', 'dakota@gmail.com', '123456789', 'interne', 'Entreprise A'],
-        ['2', 'Minerva', 'Hooper', 'minerva@gmail.com', '987654321', 'externe', 'Entreprise A'],
-        // ... autres données
-      ]
+      headerRow: ['ID', 'Nom', 'Prénom', 'Email', 'Téléphone', 'Employeur'],
+      dataRows: data
     };
-
+  
     this.initForm();
   }
+  
 
   initForm() {
     this.formateurForm = this.formBuilder.group({
