@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormateurListService } from 'app/services/formateur-list.service'; 
-
+import { EmployeurService } from 'app/services/employeur.service';
 
 declare interface TableData {
   headerRow: string[];
@@ -24,12 +24,13 @@ export class FormateurListComponent implements OnInit {
   // Variables pour contrôler l'affichage des modals
   public showFormateurModal: boolean = false;
   public showDeleteModal: boolean = false;
-  employeurs: string[] = ['Entreprise A', 'Entreprise B', 'Entreprise C', 'Freelance'];
-  types: string[]=['interne','externe']
-  constructor(private formBuilder: FormBuilder , private formateurService:FormateurListService) { }
+  employeurs: any[] = [];
+    types: string[]=['interne','externe']
+  constructor(private formBuilder: FormBuilder , private formateurService:FormateurListService, private employeurService:EmployeurService) { }
 
   ngOnInit() {
     let data: string[][] = [];
+    this.loadEmployeurs();
     this.formateurService.getAllFormateurs().subscribe({
       next: (res) => {
         console.log('Formateurs fetched:', res);
@@ -40,6 +41,7 @@ export class FormateurListComponent implements OnInit {
           String(formateur.prenom),
           String(formateur.email),
           String(formateur.tel),
+          String(formateur.type),
           String(formateur.employeur )
         ]);
         console.log("data = ", data);
@@ -53,13 +55,26 @@ export class FormateurListComponent implements OnInit {
     });
   
     this.tableData1 = {
-      headerRow: ['ID', 'Nom', 'Prénom', 'Email', 'Téléphone', 'Employeur'],
+      headerRow: ['ID', 'Nom', 'Prénom', 'Email', 'Téléphone','Type', 'Employeur'],
       dataRows: data
     };
   
     this.initForm();
   }
   
+   loadEmployeurs(): void {
+    this.employeurService.getEmployeurs().subscribe(
+      (data) => {
+        this.employeurs = data;
+      },
+      (error) => {
+        console.error('Erreur lors du chargement des employeurs', error);
+      }
+    );
+  }
+  ngAfterViewInit(){
+    this.loadFormateurs();
+  }
 
   initForm() {
     this.formateurForm = this.formBuilder.group({
@@ -97,16 +112,16 @@ export class FormateurListComponent implements OnInit {
   openEditModal(index: number) {
     this.isEditMode = true;
     this.selectedFormateurIndex = index;
-    const formateurData = this.tableData1.dataRows[index];
+    const formateurData = this.formateurs[index];
     
     this.formateurForm.patchValue({
-      id: formateurData[0],
-      nom: formateurData[1],
-      prenom: formateurData[2],
-      email: formateurData[3],
-      tel: formateurData[4],
-      type: formateurData[5],
-      employeur: formateurData[6]
+      id: formateurData.id,
+      nom: formateurData.nom,
+      prenom: formateurData.prenom,
+      email: formateurData.email,
+      tel: formateurData.tel,
+      type: formateurData.type,
+      employeur: formateurData.employeur
     });
     
     this.showFormateurModal = true;
@@ -114,26 +129,52 @@ export class FormateurListComponent implements OnInit {
 
   saveFormateur() {
     if (this.formateurForm.invalid) {
-      return;
+      console.log("unvalid");   
     }
     
     const formValues = this.formateurForm.value;
-    const formateurData = [
-      formValues.id,
-      formValues.nom,
-      formValues.prenom,
-      formValues.email,
-      formValues.tel,
-      formValues.type,
-      formValues.employeur
-    ];
-    
+    const employeurId=formValues.employeur;
+    console.log("el ID DYEL EMPLOYEUR",employeurId);
+    const formateurData :any = {
+      nom: formValues.nom,
+      prenom: formValues.prenom,
+      email: formValues.email,
+      tel: formValues.tel,
+      type: formValues.type
+    };
+    const formateurData2 :any = {
+      nom: formValues.nom,
+      prenom: formValues.prenom,
+      email: formValues.email,
+      tel: formValues.tel,
+      type: formValues.type,
+      employeur: formValues.employeur
+    };
     if (this.isEditMode) {
       // Update existing formateur
-      this.tableData1.dataRows[this.selectedFormateurIndex] = formateurData;
+      this.formateurService.updateFormateur(formValues.id, formateurData2).subscribe({
+        next: (updatedFormateur) => {
+          console.log('Formateur updated:', updatedFormateur);
+          this.loadFormateurs(); // Refresh the formateur list
+          this.showFormateurModal = false;
+        },
+        error: (err) => {
+          console.error('Error updating formateur:', err);
+        }
+      });
     } else {
       // Add new formateur
-      this.tableData1.dataRows.push(formateurData);
+      this.formateurService.createFormateur(formateurData, employeurId).subscribe({
+        next: (createdFormateur) => {
+          console.log('Formateur created:', createdFormateur);
+          this.loadFormateurs(); // Refresh the formateur list
+          this.showFormateurModal = false;
+        },
+        error: (err) => {
+          console.error('Error creating formateur:', err);
+        }
+      });
+
     }
     
     // Close modal
@@ -141,21 +182,64 @@ export class FormateurListComponent implements OnInit {
     this.formateurForm.reset();
   }
 
-  deleteFormateur(index: number) {
-    this.selectedFormateurIndex = index;
-    this.selectedFormateur = this.tableData1.dataRows[index];
-    this.showDeleteModal = true;
+  // Add this method to refresh formateur data
+  loadFormateurs() {
+    this.formateurService.getAllFormateurs().subscribe({
+      next: (res) => {
+        console.log('Formateurs fetched:', res);
+        this.formateurs = res;
+        this.tableData1.dataRows = res.map((formateur: any) => [
+          String(formateur.id),
+          String(formateur.nom),
+          String(formateur.prenom),
+          String(formateur.email),
+          String(formateur.tel),
+          String(formateur.type),
+          String(formateur.employeur )
+        ]);
+      },
+      error: (err) => {
+        console.error('Error fetching formateurs:', err);
+      }
+    });
   }
 
+  deleteFormateur(index: number) {
+    // 1. Vérifiez que l'index est valide
+    if (!this.tableData1?.dataRows || index < 0 || index >= this.tableData1.dataRows.length) {
+      console.error('Index invalide ou données non chargées');
+      return;
+    }
+  
+    // 2. Récupérez l'élément en vérifiant son existence
+    this.selectedFormateurIndex = index;
+    this.selectedFormateur = this.tableData1.dataRows[index];
+  
+    // 3. Vérification supplémentaire
+    if (!this.selectedFormateur) {
+      console.error('Aucun formateur trouvé à cet index');
+      return;
+    }
+  
+    console.log("Formateur sélectionné :", this.selectedFormateur);
+    this.showDeleteModal = true;
+  }
   confirmDelete() {
-    // Remove formateur from array
-    this.tableData1.dataRows.splice(this.selectedFormateurIndex, 1);
-    
+    const formateurId = this.selectedFormateur[0]; // Assuming ID is the first element
+    console.log("elid fassakh",formateurId);
+    this.formateurService.deleteFormateur(formateurId).subscribe({
+      next: () => {
+        this.loadFormateurs();
     // Close modal
     this.showDeleteModal = false;
     this.selectedFormateurIndex = -1;
     this.selectedFormateur = null;
+  },
+  error: (err) => {
+    console.error('Error deleting formateur:', err);
   }
+});
+}
 
   closeFormateurModal() {
     this.showFormateurModal = false;
