@@ -14,6 +14,18 @@
                             </button>
                         </div>
                     </div>
+
+                    <div class="content">
+                        <app-search-pagination
+                          [totalItems]="filteredUsers.length"
+                          [pageSize]="pageSize"
+                          [currentPage]="currentPage"
+                          (searchChange)="onSearchChange($event)"
+                          (pageChange)="onPageChange($event)">
+                        </app-search-pagination>
+                    </div>
+                    
+
                     <div class="content table-responsive table-full-width">
                         <table class="table table-hover table-striped">
                             <thead>
@@ -23,7 +35,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let user of this.users; let i = index">
+                                <tr *ngFor="let user of paginatedUsers(); let i = index">
                                     <td>{{user.id}}</td>
                                     <td>{{user.login}}</td>
                                     <td>{{"********"}}</td>

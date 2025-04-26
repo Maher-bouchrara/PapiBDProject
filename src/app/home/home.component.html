@@ -1,9 +1,62 @@
 <div class="main-content">
     <div class="container-fluid">
         <div class="row">
+            <!-- Nouvelle carte pour les compteurs -->
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="header">
+                        <h4 class="title">Statistiques Générales</h4>
+                        <p class="category">Nombre total par catégorie</p>
+                    </div>
+                    <div class="content">
+                        <div class="row">
+                            <!-- Compteur Participants -->
+                            <div class="col-md-3">
+                                <div class="stats-item text-center">
+                                    <i class="fa fa-users text-info" style="font-size: 2em;"></i>
+                                    <h3>{{participantsCount}}</h3>
+                                    <p>Participants</p>
+                                </div>
+                            </div>
+                            <!-- Compteur Formateurs -->
+                            <div class="col-md-3">
+                                <div class="stats-item text-center">
+                                    <i class="fa fa-address-card" style="font-size: 2em;"></i>
+                                    <h3>{{formateursCount}}</h3>
+                                    <p>Formateurs</p>
+                                </div>
+                            </div>
+                            <!-- Compteur Formations -->
+                            <div class="col-md-3">
+                                <div class="stats-item text-center">
+                                    <i class="fa fa-book text-warning" style="font-size: 2em;"></i>
+                                    <h3>{{formationsCount}}</h3>
+                                    <p>Formations</p>
+                                </div>
+                            </div>
+                            <!-- Compteur Utilisateurs -->
+                            <div class="col-md-3">
+                                <div class="stats-item text-center">
+                                    <i class="fa fa-user text-danger" style="font-size: 2em;"></i>
+                                    <h3>{{utilisateursCount}}</h3>
+                                    <p>Utilisateurs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="footer">
+                            <hr>
+                            <div class="stats">
+                                <i class="fa fa-refresh"></i> Mis à jour à l'instant
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-4">
                 <lbd-chart
-                  [title]="'Email Statistics'"
+                  [title]="'Nombre de formations par domaine'"
                   [subtitle]="'Last Campaign Performance'"
                   [chartClass]="'ct-perfect-fourth'"
                   [chartType]="emailChartType"
@@ -16,7 +69,7 @@
             </div>
             <div class="col-md-8">
                 <lbd-chart
-                  [title]="'Users Behavior'"
+                  [title]="'Nombre de participants par formations'"
                   [subtitle]="'24 Hours performance'"
                   [chartType]="hoursChartType"
                   [chartData]="hoursChartData"
