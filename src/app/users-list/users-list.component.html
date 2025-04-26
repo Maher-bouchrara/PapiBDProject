@@ -60,10 +60,10 @@
             </div>
             <div class="modal-body">
                 <form [formGroup]="userForm">
-                    <div class="form-group">
+                    <!-- <div class="form-group">
                         <label for="userId">ID</label>
                         <input type="text" class="form-control" id="userId" formControlName="id" [readonly]="isEditMode">
-                    </div>
+                    </div> -->
                     <div class="form-group">
                         <label for="userLogin">Nom d'utilisateur</label>
                         <input type="text" class="form-control" id="userLogin" formControlName="login">
@@ -78,10 +78,22 @@
                             <div *ngIf="userForm.get('motDePasse').errors?.required">Le mot de passe est requis</div>
                         </div>
                     </div>
+
+
+                    <div class="form-group">
+                        <label for="userEmail">Email</label>
+                        <input type="email" class="form-control" id="userEmail" formControlName="email">
+                        <div *ngIf="userForm?.get('email')?.invalid && (userForm?.get('email')?.dirty || userForm?.get('email')?.touched)" class="text-danger">
+                            <div *ngIf="userForm?.get('email')?.errors?.required">L'email est requis</div>
+                            <div *ngIf="userForm?.get('email')?.errors?.email">Veuillez entrer une adresse email valide</div>
+                        </div>
+                    </div>
+
+
                     <div class="form-group">
                         <label for="utilisateurRole">Role</label>
                         <select class="form-control" id="role" formControlName="role">
-                            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+                            <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
                         </select>
                     </div> 
                 </form>
