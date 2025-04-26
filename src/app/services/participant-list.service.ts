@@ -15,6 +15,10 @@ export class ParticipantListService {
       return this.http.get<any[]>(this.apiUrl);
     }
 
+    deleteParticipant(participantId: any){
+      return this.http.delete(`${this.apiUrl}/${participantId}`);
+    }
+
     createParticipant(participant: any, profileId: number, structureId: number){
       console.log(participant)
       const body = {
@@ -27,4 +31,23 @@ export class ParticipantListService {
         }
       });
     }
+
+    updateParticipant(participantId: number, participant: any): Observable<any> {
+      const participantToSend = {
+        nom: participant.nom,
+        prenom: participant.prenom,
+        email: participant.email,
+        tel: participant.tel,
+        profile: { id: participant.profileId },       
+        structure: { id: participant.structureId }    
+      };
+    
+      console.log('Participant envoyé :', participantToSend);
+    
+      return this.http.put(`${this.apiUrl}/${participantId}`, participantToSend);
+    }
+
+    
+    
+  
 }
