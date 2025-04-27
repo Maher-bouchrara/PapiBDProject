@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -21,12 +21,24 @@ export class FormationListService {
       return this.http.get(`${this.apiUrl}/${formationId}/participants`);
     }
 
-  createFormateur(formateur: any,employeurId: Number): Observable<any> {
-    return this.http.post(`${this.apiUrl}?employeurId=${employeurId}`, formateur);  }
-  
-  updateFormateur(formateurId: number, formateur: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${formateurId}`, formateur);
+    createFormation1(formation: any, formateurId: number, domaineId: number): Observable<any> {
+      const params = new HttpParams()
+        .set('formateurId', formateurId.toString())
+        .set('domaineId', domaineId.toString());
+    
+      return this.http.post(`${this.apiUrl}`, formation, { params });
+    }
+
+    updateFormation(formationId:number,formation: any, formateurId: number, domaineId: number): Observable<any> {
+      const params = new HttpParams()
+      .set('formateurId', formateurId.toString())
+      .set('domaineId', domaineId.toString());
+
+    return this.http.put(`${this.apiUrl}/${formationId}`, formation, { params });
     }
   
-
+    //  EXECEPTION : getAllDomains
+    getAllDomaines(): Observable<any[]> {
+      return this.http.get<any[]>('http://localhost:8094/domaines');
+    }
 }

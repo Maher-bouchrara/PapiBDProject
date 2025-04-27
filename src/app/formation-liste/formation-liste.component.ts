@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormationListService } from 'app/services/formation-list.service';
 import { ParticipantListService } from 'app/services/participant-list.service';
+import { FormateurListService } from 'app/services/formateur-list.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -29,15 +30,21 @@ export class FormationListeComponent implements OnInit {
   selectedIndex: number = -1;
 
   // Listes pour les select
-  domaines = ['Développement Web', 'Management', 'Bureautique', 'Communication', 'Marketing Digital', 'Data Science'];
-  formateurs = ['Dupont Jean', 'Martin Sophie', 'Dubois Pierre', 'Leroy Marie', 'Garcia Thomas'];
-  participants = [
-    { id: 'P001', nom: 'miladi', prenom: 'imen', email: 'miladiphg@gmail.com' },
-    { id: 'P002', nom: 'Moreau', prenom: 'Thomas', email: 'thomas.moreau@example.com' },
-    { id: 'P003', nom: 'Petit', prenom: 'Sophie', email: 'sophie.petit@example.com' },
-    { id: 'P004', nom: 'Bernard', prenom: 'Luc', email: 'luc.bernard@example.com' },
-    { id: 'P005', nom: 'Durant', prenom: 'Emma', email: 'emma.durant@example.com' }
-  ];
+  domaines:any ;
+  // domaines = ['Développement Web', 'Management', 'Bureautique', 'Communication', 'Marketing Digital', 'Data Science'];
+  
+  formateurs:any;
+  // formateurs = ['Dupont Jean', 'Martin Sophie', 'Dubois Pierre', 'Leroy Marie', 'Garcia Thomas'];
+  
+  participants: any;
+  
+  // participants = [
+  //   { id: 'P001', nom: 'miladi', prenom: 'imen', email: 'miladiphg@gmail.com' },
+  //   { id: 'P002', nom: 'Moreau', prenom: 'Thomas', email: 'thomas.moreau@example.com' },
+  //   { id: 'P003', nom: 'Petit', prenom: 'Sophie', email: 'sophie.petit@example.com' },
+  //   { id: 'P004', nom: 'Bernard', prenom: 'Luc', email: 'luc.bernard@example.com' },
+  //   { id: 'P005', nom: 'Durant', prenom: 'Emma', email: 'emma.durant@example.com' }
+  // ];
 
   // Form Group
   formationForm: FormGroup;
@@ -47,9 +54,9 @@ export class FormationListeComponent implements OnInit {
   // Liste des participants sélectionnés pour la formation en cours d'édition
   selectedParticipants: any[] = [];
   
-  constructor(private fb: FormBuilder ,private participantListService:ParticipantListService, private formationListService:FormationListService) {
+  constructor(private fb: FormBuilder ,private participantListService:ParticipantListService, private formationListService:FormationListService , private formateurListService:FormateurListService) {
     this.formationForm = this.fb.group({
-      id: ['', Validators.required],
+      // id: ['', Validators.required],
       titre: ['', Validators.required],
       dateDebut: ['', Validators.required],
       dateFin: ['', Validators.required],
@@ -77,6 +84,49 @@ export class FormationListeComponent implements OnInit {
     // Initialisation des données si nécessaire
     // Pagination
     // Fin - Pagination 
+    this.participantListService.getAllParticipant().subscribe({
+      next: (res)=>{
+        this.participants = res ;
+        console.log("allParticipants: ",this.participants);
+      },
+      error: (err)=>{
+        console.log('Error fetching participants: ',err);
+      },
+      complete: ()=>{
+        console.log('participants fetching completed.');
+
+      }
+    });
+
+    this.formationListService.getAllDomaines().subscribe({
+      next: (res)=>{
+        this.domaines = res ;
+        console.log("Alldomaines: ",this.domaines);
+      },
+      error: (err)=>{
+        console.log('Error fetching Alldomaines: ',err);
+      },
+      complete: ()=>{
+        console.log('Alldomaines fetching completed.');
+
+      }
+    });
+
+    this.formateurListService.getAllFormateurs().subscribe({
+      next: (res)=>{
+        this.formateurs = res ;
+        console.log("formateurs: ",this.formateurs);
+      },
+      error: (err)=>{
+        console.log('Error fetching formateurs: ',err);
+      },
+      complete: ()=>{
+        console.log('formateurs fetching completed.');
+
+      }
+    })
+
+
     let data: string[][] = [];
     this.formationListService.getAllFormations().subscribe({
       next: async (res)=>{
@@ -242,23 +292,37 @@ export class FormationListeComponent implements OnInit {
   openEditModal(index: number) {
     this.isEditMode = true;
     this.selectedIndex = index;
+    console.log("selectedIndex:",this.selectedIndex);
     const formation = this.tableData.dataRows[index];
-    
+   // Extract names from table data
+   const formateurName = formation[6]; // e.g., "Jean Dupont"
+   const domaineName = formation[5];   // e.g., "Informatique"
+ 
+   // Find matching formateur ID (if names are stored as "Nom Prénom")
+   const selectedFormateur = this.formateurs.find(
+     f => `${f.nom} ${f.prenom}` === formateurName
+   );
+ 
+   // Find matching domaine ID
+   const selectedDomaine = this.domaines.find(
+     d => d.libelle === domaineName
+   );
+
     // Simulation des participants pour l'édition
     this.selectedParticipants = this.participants.slice(0, parseInt(formation[8]));
     
     this.formationForm.patchValue({
-      id: formation[0],
+      // id: formation[0],
       titre: formation[1],
       dateDebut: this.formatDateForInput(formation[2]),
       dateFin: this.formatDateForInput(formation[3]),
       duree: formation[4],
-      domaine: formation[5],
-      formateur: formation[6],
+      domaine: selectedDomaine?.id || null,  // Use domaine ID (or null)
+      formateur: selectedFormateur?.id || null, // Use formateur ID (or null)
       budget: formation[7],
       participants: this.selectedParticipants.map(p => p.id)
     });
-    
+    console.log("openModal  formation ! ",this.formationForm.value);
     this.showFormationModal = true;
   }
 
@@ -269,8 +333,8 @@ export class FormationListeComponent implements OnInit {
 
   saveFormation() {
     const formValues = this.formationForm.value;
+    
     const formationData = [
-      formValues.id,
       formValues.titre,
       this.formatDateForDisplay(formValues.dateDebut),
       this.formatDateForDisplay(formValues.dateFin),
@@ -280,11 +344,97 @@ export class FormationListeComponent implements OnInit {
       formValues.budget.toString(),
       this.selectedParticipants.length.toString()
     ];
-    
+    const formation = {
+      titre:formValues.titre,
+      date:formValues.dateDebut.replace(/-/g, ''),
+      duree:formValues.duree,
+      budget:formValues.budget,
+    }
+    const domaineId =formValues.domaine;
+    const formateurId =formValues.formateur;
+
     if (this.isEditMode) {
-      this.tableData.dataRows[this.selectedIndex] = formationData;
+      // this.tableData.dataRows[this.selectedIndex] = formationData;
+      console.log("formationData:",formationData);
+      const formationId=this.tableData.dataRows[this.selectedIndex][0];;
+      console.log("formationId:",formationId);
+
+      this.formationListService.updateFormation(formationId,formation, formateurId, domaineId).subscribe({
+        next: (createdFormation) => {
+          console.log('Formation créée:', createdFormation);
+          
+          // Notification de succès
+          Swal.fire({
+            title: 'Succès!',
+            text: 'La formation a été créée avec succès.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6'
+          });
+      
+          this.loadFormations(); // Rafraîchir la liste
+          this.showFormationModal = false;
+        },
+        error: (err) => {
+          console.error('Erreur lors de la création:', err);
+          
+          // Notification d'erreur
+          Swal.fire({
+            title: 'Erreur!',
+            html: `
+              <div style="text-align: left;">
+                <p>La création a échoué pour les raisons suivantes :</p>
+                <ul>
+                  <li>${err.error?.message || 'Erreur serveur'}</li>
+                  ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                </ul>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonText: 'Compris',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
     } else {
-      this.tableData.dataRows.push(formationData);
+      // Add new new formation
+      this.formationListService.createFormation1(formation, formateurId, domaineId).subscribe({
+        next: (createdFormation) => {
+          console.log('Formation créée:', createdFormation);
+          
+          // Notification de succès
+          Swal.fire({
+            title: 'Succès!',
+            text: 'La formation a été créée avec succès.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6'
+          });
+      
+          this.loadFormations(); // Rafraîchir la liste
+          this.showFormationModal = false;
+        },
+        error: (err) => {
+          console.error('Erreur lors de la création:', err);
+          
+          // Notification d'erreur
+          Swal.fire({
+            title: 'Erreur!',
+            html: `
+              <div style="text-align: left;">
+                <p>La création a échoué pour les raisons suivantes :</p>
+                <ul>
+                  <li>${err.error?.message || 'Erreur serveur'}</li>
+                  ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                </ul>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonText: 'Compris',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
     }
     
     this.closeFormationModal();
@@ -298,43 +448,60 @@ export class FormationListeComponent implements OnInit {
   }
 
   closeDeleteModal() {
-    const formationId = this.selectedFormation[0]; // Assuming ID is the first element
+    this.showDeleteModal = false;
+    this.selectedIndex = -1;
+    this.selectedFormation = null;
+  }
+  executeDelete() {
+    const formationId = this.selectedFormation[0];
     
     this.formationListService.deleteFormation(formationId).subscribe({
       next: () => {
         this.loadFormations();
-        // Close modal
         this.showDeleteModal = false;
         this.selectedIndex = -1;
         this.selectedFormation = null;
   
-        // Success notification (optional)
         Swal.fire({
-          title: 'Succès!',
+          title: 'Succès !',
           text: 'Formation supprimée avec succès.',
           icon: 'success',
           confirmButtonText: 'OK'
         });
       },
       error: (err) => {
-        console.error('Error deleting formation:', err);
-        this.showDeleteModal = false;
-        this.selectedIndex = -1;
-        this.selectedFormation = null;
-        // Error notification
+        console.error('Erreur:', err);
         Swal.fire({
-          title: 'Erreur!',
-          text: 'Impossible de supprimer cette ligne. Elle est peut-être référencée ailleurs..',
+          title: 'Erreur !',
+          text: 'Suppression impossible : ' + (err.error?.message || 'Cette formation à peut-être des participants!'),
           icon: 'error',
           confirmButtonText: 'OK'
         });
       }
     });
   }
-
   confirmDelete() {
-    this.tableData.dataRows.splice(this.selectedIndex, 1);
-    this.closeDeleteModal();
+    // Afficher une confirmation avant suppression
+    Swal.fire({
+      title: 'Êtes-vous sûr ?',
+      text: 'Cette action est irréversible !',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer !',
+      cancelButtonText: 'Annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Lancer la suppression SEULEMENT si l'utilisateur confirme
+        this.executeDelete();
+      } else {
+        // Fermer le modal sans supprimer
+        this.showDeleteModal = false;
+        this.selectedIndex = -1;
+        this.selectedFormation = null;
+      }
+    });
   }
   
   // Méthodes pour l'envoi d'email
