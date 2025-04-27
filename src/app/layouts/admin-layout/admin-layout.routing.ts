@@ -14,6 +14,7 @@ import { FormateurListComponent } from 'app/formateur-list/formateur-list.compon
 import { FormationListeComponent } from 'app/formation-liste/formation-liste.component';
 import { ParticipantListComponent } from 'app/participant-list/participant-list.component';
 import { AuthGuard } from 'app/guards/auth.guard';
+import { EmployeurListComponent } from 'app/employeur-list/employeur-list.component';
 
 export const AdminLayoutRoutes: Routes = [
     { path: 'dashboard',      component: HomeComponent ,canActivate: [AuthGuard]},
@@ -30,5 +31,5 @@ export const AdminLayoutRoutes: Routes = [
     {path: 'formateur-list', component:FormateurListComponent ,canActivate: [AuthGuard]},
     {path: 'formation-liste', component:FormationListeComponent ,canActivate: [AuthGuard]},
     { path: 'participant-list',           component: ParticipantListComponent  ,canActivate: [AuthGuard]},
-
+    { path: 'employeur-list',           component: EmployeurListComponent  ,canActivate: [AuthGuard]},
 ];

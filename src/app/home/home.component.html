@@ -57,7 +57,7 @@
             <div class="col-md-4">
                 <lbd-chart
                   [title]="'Nombre de formations par domaine'"
-                  [subtitle]="'Last Campaign Performance'"
+                  [subtitle]="'En pourcentage'"
                   [chartClass]="'ct-perfect-fourth'"
                   [chartType]="emailChartType"
                   [chartData]="emailChartData"
@@ -69,6 +69,71 @@
             </div>
             <div class="col-md-8">
                 <lbd-chart
+                  [title]="'Budget en DT par domaine en 2025 '"
+                  [subtitle]="'Les trois domaines les plus pertinents'"
+                  [chartType]="activityChartType"
+                  [chartData]="activityChartData"
+                  [chartOptions]="activityChartOptions"
+                  [chartResponsive]="activityChartResponsive"
+                  [legendItems]="activityChartLegendItems"
+                  [withHr]="true"
+                  [footerIconClass]="'fa fa-check'"
+                  [footerText]="'Data information certified'">
+                </lbd-chart>
+                
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h4 class="title">Top 3 formateurs  <i class="fa fa-trophy text-warning"></i></h4>
+                                        <p class="category">Les meilleurs formateurs du mois</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="content table-responsive table-full-width">
+                                <table class="table table-hover table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nom</th>
+                                            <th>Prénom</th>
+                                            <th>Email</th>
+                                            <th>Téléphone</th>
+                                            <th>Spécialité</th>
+                                            <th>Employeur</th>
+                                            <th>Nb formations</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let formateur of formateurs; let i = index">
+                                            <td>{{ i + 1 }}</td>
+                                            <td>{{ formateur.nom }}</td>
+                                            <td>{{ formateur.prenom }}</td>
+                                            <td>{{ formateur.email }}</td>
+                                            <td>{{ formateur.tel }}</td>
+                                            <td>{{ formateur.specialite }}</td>
+                                            <td>{{ formateur.employeur }}</td>
+                                            <td>{{ formateur.nb }}</td>
+                                            
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- <div class="row">
+            <div class="col-md-6">
+                <lbd-chart
                   [title]="'Nombre de participants par formations'"
                   [subtitle]="'24 Hours performance'"
                   [chartType]="hoursChartType"
@@ -79,22 +144,6 @@
                   [withHr]="true"
                   [footerIconClass]="'fa fa-history'"
                   [footerText]="'Updated 3 minutes ago'">
-                </lbd-chart>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <lbd-chart
-                  [title]="'2021 Sales'"
-                  [subtitle]="'All products including Taxes'"
-                  [chartType]="activityChartType"
-                  [chartData]="activityChartData"
-                  [chartOptions]="activityChartOptions"
-                  [chartResponsive]="activityChartResponsive"
-                  [legendItems]="activityChartLegendItems"
-                  [withHr]="true"
-                  [footerIconClass]="'fa fa-check'"
-                  [footerText]="'Data information certified'">
                 </lbd-chart>
             </div>
             <div class="col-md-6">
@@ -235,5 +284,5 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </div>
