@@ -3,6 +3,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormationListService } from 'app/services/formation-list.service';
 import { ParticipantListService } from 'app/services/participant-list.service';
 import { FormateurListService } from 'app/services/formateur-list.service';
+import { CertifService } from 'app/services/certif.service';
+import { EmailService } from 'app/services/email.service';
+
 import Swal from 'sweetalert2';
 
 @Component({
@@ -31,6 +34,8 @@ export class FormationListeComponent implements OnInit {
   domaines:any ;  
   formateurs:any;  
   participants: any;
+  isLoading = false;  
+  progress = 0; 
 
   // Form Group
   formationForm: FormGroup;
@@ -46,7 +51,7 @@ export class FormationListeComponent implements OnInit {
   initialParticipants: any[] = [];
 
   
-  constructor(private fb: FormBuilder ,private participantListService:ParticipantListService, private formationListService:FormationListService , private formateurListService:FormateurListService) {
+  constructor(private fb: FormBuilder ,private participantListService:ParticipantListService, private formationListService:FormationListService , private formateurListService:FormateurListService,private certifService:CertifService,private emailService :EmailService) {
     this.formationForm = this.fb.group({
       // id: ['', Validators.required],
       titre: ['', Validators.required],
@@ -539,14 +544,14 @@ export class FormationListeComponent implements OnInit {
     // Simulation des destinataires pour l'email
     const nbParticipants = parseInt(this.selectedFormation[8]);
     const destinataires = this.participants.slice(0, nbParticipants);
-   
+
     const formationTitle = this.selectedFormation[1];
     const startDate = this.selectedFormation[2];
     
     this.emailForm.patchValue({
       objet: `Convocation à la formation "${formationTitle}"`,
       message: `Bonjour,\n\nVous êtes convoqué(e) à la formation "${formationTitle}" qui débutera le ${startDate}.\nVoici le lien google meet de la formation https://meet.google.com/landing\nCordialement,\nLe service formation`,
-      destinataires: destinataires.map(p => p.id)
+      destinataires: destinataires.map((p => p.email))
     });
     
     this.showEmailModal = true;
@@ -557,11 +562,53 @@ export class FormationListeComponent implements OnInit {
   }
   
   sendEmail() {
-    // Simulation d'envoi d'email
-    console.log('Email envoyé !', this.emailForm.value);
-    alert('Les emails ont été envoyés avec succès !');
-    this.closeEmailModal();
-  }
+   const formValue=this.emailForm.value
+   const requestData={
+    objet:formValue.objet,
+    message:formValue.message,
+    listeMails:formValue.destinataires
+   }
+   this.isLoading = true;
+    this.progress = 0;
+    Swal.fire({
+      title: 'Envoi des emails...',
+      html: 'Veuillez patienter pendant l\'envoi des emails.<br><br><progress id="progress-bar" value="0" max="100"></progress>',
+      didOpen: () => {
+        Swal.showLoading(); // Montre le spinner de chargement de SweetAlert
+      },
+      willClose: () => {
+        // Ferme la pop-up après l'envoi
+        this.isLoading = false;
+      },
+      allowOutsideClick: false,  // Empêche de fermer la pop-up en cliquant à l'extérieur
+      didClose: () => {
+        this.isLoading = false; // Assurez-vous que la pop-up se ferme correctement
+      }
+    });
+  
+   console.log(formValue.destinataires)
+   this.emailService.envoyerEmails(requestData).subscribe({
+    next: (response) => {
+      console.log(response.message); // "Certificats générés avec succès !"
+      Swal.fire('Succès', response.message, 'success');
+    },
+    error: (error) => {
+      console.error("Erreur lors de l'envoie des emails' :", error);
+      Swal.fire('Erreur', "Impossible d'envoyer les emails.", 'error');
+    }
+  });
+  let progress = 0;
+  const interval = setInterval(() => {
+    if (progress < 100) {
+      progress += 10;  // Augmente de 10% à chaque intervalle
+      const progressBar = document.getElementById('progress-bar') as HTMLProgressElement;
+      
+      progressBar.value = progress; // Met à jour la valeur de la barre de progression
+    } else {
+      clearInterval(interval);  // Arrête l'intervalle lorsque la barre atteint 100%
+    }
+  }, 800);  // Mise à jour tous les 500ms
+}
   
   // Méthodes pour la génération de certificats
   openCertificatModal(index: number) {
@@ -574,7 +621,7 @@ export class FormationListeComponent implements OnInit {
     
     this.certificatForm.patchValue({
       titre: `Certificat de réussite - ${this.selectedFormation[1]}`,
-      participants: participantsForCert.map(p => p.id)
+      participants: participantsForCert.map(p => `${p.nom} ${p.prenom}`)
     });
     
     this.showCertificatModal = true;
@@ -585,11 +632,26 @@ export class FormationListeComponent implements OnInit {
   }
   
   generateCertificats() {
-    // Simulation de génération de certificats
-    console.log('Certificats générés !', this.certificatForm.value);
-    alert('Les certificats ont été générés avec succès !');
-    this.closeCertificatModal();
+    const formValue = this.certificatForm.value;
+  
+    const requestData = {
+      certTitle: formValue.titre,
+      date: formValue.dateGeneration, 
+      participants: formValue.participants
+    };
+  
+    this.certifService.generateCertificates(requestData).subscribe({
+      next: (response) => {
+        console.log(response.message); // "Certificats générés avec succès !"
+        Swal.fire('Succès', response.message, 'success');
+      },
+      error: (error) => {
+        console.error('Erreur lors de la génération des certificats :', error);
+        Swal.fire('Erreur', 'Impossible de générer les certificats.', 'error');
+      }
+    });
   }
+  
   
   // Gestion des participants
   toggleParticipant(participant: any) {
