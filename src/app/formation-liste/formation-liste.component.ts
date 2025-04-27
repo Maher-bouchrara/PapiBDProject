@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormationListService } from 'app/services/formation-list.service';
+import { ParticipantListService } from 'app/services/participant-list.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-formation-liste',
@@ -7,15 +10,13 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./formation-liste.component.css']
 })
 export class FormationListeComponent implements OnInit {
+
+  public formations : any;
+
   // Variables pour la table
   tableData = {
     headerRow: ['ID', 'Titre', 'Date Début', 'Date Fin', 'Durée (jours)', 'Domaine', 'Formateur', 'Budget (€)', 'Participants'],
-    dataRows: [
-      ['F001', 'Angular Avancé', '10/05/2025', '15/05/2025', '5', 'Développement Web', 'Dupont Jean', '3500', '15'],
-      ['F002', 'React Fondamentaux', '01/06/2025', '05/06/2025', '5', 'Développement Web', 'Martin Sophie', '3000', '12'],
-      ['F003', 'Management d\'équipe', '15/06/2025', '17/06/2025', '3', 'Management', 'Dubois Pierre', '2500', '8'],
-      ['F004', 'Excel Avancé', '20/06/2025', '21/06/2025', '2', 'Bureautique', 'Leroy Marie', '1200', '20']
-    ]
+    dataRows: []
   };
 
   // Variables pour les modals
@@ -46,7 +47,7 @@ export class FormationListeComponent implements OnInit {
   // Liste des participants sélectionnés pour la formation en cours d'édition
   selectedParticipants: any[] = [];
   
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder ,private participantListService:ParticipantListService, private formationListService:FormationListService) {
     this.formationForm = this.fb.group({
       id: ['', Validators.required],
       titre: ['', Validators.required],
@@ -74,8 +75,160 @@ export class FormationListeComponent implements OnInit {
 
   ngOnInit() {
     // Initialisation des données si nécessaire
+    // Pagination
+    // Fin - Pagination 
+    let data: string[][] = [];
+    this.formationListService.getAllFormations().subscribe({
+      next: async (res)=>{
+        console.log('Formations fetched:', res);
+        this.formations = res ;
+        data = await Promise.all(res.map(async (formation: any) => {
+          // Helper function to safely convert to string with fallback to empty string
+          const safeString = (value: any) => (value !== null && value !== undefined) ? String(value) : '';
+        
+          // Format date - returns '' if formation.date is null/undefined
+          const dateStr = safeString(formation.date);
+          const formattedDate = dateStr && dateStr.length >= 8 
+            ? `${dateStr.substr(6, 2)}/${dateStr.substr(4, 2)}/${dateStr.substr(0, 4)}`
+            : '';
+        
+          // Calculate end date - returns '' if date is invalid
+          let formattedEndDate = '';
+          if (dateStr && dateStr.length >= 8) {
+            try {
+              const startDate = new Date(
+                parseInt(dateStr.substr(0, 4)),
+                parseInt(dateStr.substr(4, 2)) - 1,
+                parseInt(dateStr.substr(6, 2))
+              );
+              const endDate = new Date(startDate);
+              endDate.setDate(startDate.getDate() + parseInt(formation.duree || 0));
+              formattedEndDate = `${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}/${endDate.getFullYear()}`;
+            } catch (e) {
+              console.error('Date calculation error:', e);
+            }
+          }
+        
+          // Get participants count - returns 0 if error occurs
+          let participantsCount = 0;
+          try {
+            const participants = formation.id 
+              ? await this.formationListService.getFormationParticipants(formation.id).toPromise()
+              : null;
+            participantsCount = participants ? participants.length : 0;
+          } catch (error) {
+            console.error(`Error fetching participants for formation ${formation.id}:`, error);
+          }
+        
+          // Safely handle nested objects (domaine and formateur)
+          const domaineLibelle = formation.domaine ? safeString(formation.domaine.libelle) : '';
+          const formateurName = formation.formateur 
+            ? `${safeString(formation.formateur.nom)} ${safeString(formation.formateur.prenom)}`.trim()
+            : '';
+        
+          return [
+            safeString(formation.id),
+            safeString(formation.titre),
+            formattedDate,
+            formattedEndDate,
+            safeString(formation.duree),
+            domaineLibelle,
+            formateurName,
+            safeString(formation.budget),
+            safeString(participantsCount)
+          ];
+        }));
+          console.log("formations : ",data);
+          this.tableData.dataRows = data;
+      },
+      error: (err)=>{
+        console.log('Error fetching formations: ',err);
+      },
+      complete: ()=>{
+        console.log('formations fetching completed.');
+
+      }
+    })
   }
 
+  ngAfterViewInit(){
+    this.loadFormations();
+  }
+
+  loadFormations(){
+    let data: string[][] = [];
+    this.formationListService.getAllFormations().subscribe({
+      next: async (res)=>{
+        console.log('Formations fetched:', res);
+        this.formations = res ;
+        data = await Promise.all(res.map(async (formation: any) => {
+          // Helper function to safely convert to string with fallback to empty string
+          const safeString = (value: any) => (value !== null && value !== undefined) ? String(value) : '';
+        
+          // Format date - returns '' if formation.date is null/undefined
+          const dateStr = safeString(formation.date);
+          const formattedDate = dateStr && dateStr.length >= 8 
+            ? `${dateStr.substr(6, 2)}/${dateStr.substr(4, 2)}/${dateStr.substr(0, 4)}`
+            : '';
+        
+          // Calculate end date - returns '' if date is invalid
+          let formattedEndDate = '';
+          if (dateStr && dateStr.length >= 8) {
+            try {
+              const startDate = new Date(
+                parseInt(dateStr.substr(0, 4)),
+                parseInt(dateStr.substr(4, 2)) - 1,
+                parseInt(dateStr.substr(6, 2))
+              );
+              const endDate = new Date(startDate);
+              endDate.setDate(startDate.getDate() + parseInt(formation.duree || 0));
+              formattedEndDate = `${endDate.getDate().toString().padStart(2, '0')}/${(endDate.getMonth() + 1).toString().padStart(2, '0')}/${endDate.getFullYear()}`;
+            } catch (e) {
+              console.error('Date calculation error:', e);
+            }
+          }
+        
+          // Get participants count - returns 0 if error occurs
+          let participantsCount = 0;
+          try {
+            const participants = formation.id 
+              ? await this.formationListService.getFormationParticipants(formation.id).toPromise()
+              : null;
+            participantsCount = participants ? participants.length : 0;
+          } catch (error) {
+            console.error(`Error fetching participants for formation ${formation.id}:`, error);
+          }
+        
+          // Safely handle nested objects (domaine and formateur)
+          const domaineLibelle = formation.domaine ? safeString(formation.domaine.libelle) : '';
+          const formateurName = formation.formateur 
+            ? `${safeString(formation.formateur.nom)} ${safeString(formation.formateur.prenom)}`.trim()
+            : '';
+        
+          return [
+            safeString(formation.id),
+            safeString(formation.titre),
+            formattedDate,
+            formattedEndDate,
+            safeString(formation.duree),
+            domaineLibelle,
+            formateurName,
+            safeString(formation.budget),
+            safeString(participantsCount)
+          ];
+        }));
+          console.log("formations : ",data);
+          this.tableData.dataRows = data;
+      },
+      error: (err)=>{
+        console.log('Error fetching formations: ',err);
+      },
+      complete: ()=>{
+        console.log('formations fetching completed.');
+
+      }
+    })
+  }
   // Méthodes pour la gestion des formations
   openAddModal() {
     this.isEditMode = false;
@@ -141,11 +294,42 @@ export class FormationListeComponent implements OnInit {
     this.selectedIndex = index;
     this.selectedFormation = this.tableData.dataRows[index];
     this.showDeleteModal = true;
+    console.log("selectedFormation",this.selectedFormation);
   }
 
   closeDeleteModal() {
-    this.showDeleteModal = false;
-    this.selectedFormation = null;
+    const formationId = this.selectedFormation[0]; // Assuming ID is the first element
+    
+    this.formationListService.deleteFormation(formationId).subscribe({
+      next: () => {
+        this.loadFormations();
+        // Close modal
+        this.showDeleteModal = false;
+        this.selectedIndex = -1;
+        this.selectedFormation = null;
+  
+        // Success notification (optional)
+        Swal.fire({
+          title: 'Succès!',
+          text: 'Formation supprimée avec succès.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      },
+      error: (err) => {
+        console.error('Error deleting formation:', err);
+        this.showDeleteModal = false;
+        this.selectedIndex = -1;
+        this.selectedFormation = null;
+        // Error notification
+        Swal.fire({
+          title: 'Erreur!',
+          text: 'Impossible de supprimer cette ligne. Elle est peut-être référencée ailleurs..',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
   }
 
   confirmDelete() {
