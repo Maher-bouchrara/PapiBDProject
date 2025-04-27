@@ -22,6 +22,7 @@ import { FormateurListComponent } from './formateur-list/formateur-list.componen
 import { FormationListeComponent } from './formation-liste/formation-liste.component';
 import { ParticipantListComponent } from './participant-list/participant-list.component';
 import { SearchPaginationComponent } from './search-pagination/search-pagination.component';
+import { EmployeurListComponent } from './employeur-list/employeur-list.component';
 
 @NgModule({
   imports: [
@@ -45,6 +46,7 @@ import { SearchPaginationComponent } from './search-pagination/search-pagination
     FormationListeComponent,
     ParticipantListComponent,
     SearchPaginationComponent,
+    EmployeurListComponent,
 ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent]
