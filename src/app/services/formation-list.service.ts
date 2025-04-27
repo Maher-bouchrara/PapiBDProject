@@ -41,4 +41,15 @@ export class FormationListService {
     getAllDomaines(): Observable<any[]> {
       return this.http.get<any[]>('http://localhost:8094/domaines');
     }
+    addParticipantToFormation(formationId: number, participantId: number): Observable<any> {
+      return this.http.post(
+        `${this.apiUrl}/${formationId}/participants/${participantId}`,
+        {}
+      );
+    }
+    removeParticipantFromFormation(formationId: number, participantId: number): Observable<any> {
+      return this.http.delete(
+        `${this.apiUrl}/${formationId}/participants/${participantId}`
+      );
+    }
 }

@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 export class FormationListeComponent implements OnInit {
 
   public formations : any;
-
+  public selectedFormationId : any;
   // Variables pour la table
   tableData = {
     headerRow: ['ID', 'Titre', 'Date Début', 'Date Fin', 'Durée (jours)', 'Domaine', 'Formateur', 'Budget (€)', 'Participants'],
@@ -28,31 +28,23 @@ export class FormationListeComponent implements OnInit {
   isEditMode = false;
   selectedFormation: any = null;
   selectedIndex: number = -1;
-
-  // Listes pour les select
-  domaines:any ;
-  // domaines = ['Développement Web', 'Management', 'Bureautique', 'Communication', 'Marketing Digital', 'Data Science'];
-  
-  formateurs:any;
-  // formateurs = ['Dupont Jean', 'Martin Sophie', 'Dubois Pierre', 'Leroy Marie', 'Garcia Thomas'];
-  
+  domaines:any ;  
+  formateurs:any;  
   participants: any;
-  
-  // participants = [
-  //   { id: 'P001', nom: 'miladi', prenom: 'imen', email: 'miladiphg@gmail.com' },
-  //   { id: 'P002', nom: 'Moreau', prenom: 'Thomas', email: 'thomas.moreau@example.com' },
-  //   { id: 'P003', nom: 'Petit', prenom: 'Sophie', email: 'sophie.petit@example.com' },
-  //   { id: 'P004', nom: 'Bernard', prenom: 'Luc', email: 'luc.bernard@example.com' },
-  //   { id: 'P005', nom: 'Durant', prenom: 'Emma', email: 'emma.durant@example.com' }
-  // ];
 
   // Form Group
   formationForm: FormGroup;
   emailForm: FormGroup;
   certificatForm: FormGroup;
-  
+
+  private currentFormationId: number | null = null;
+  private initialParticipantIds: number[] = [];
+  currentParticipants: number[] = []; // Pour le template
+
   // Liste des participants sélectionnés pour la formation en cours d'édition
   selectedParticipants: any[] = [];
+  initialParticipants: any[] = [];
+
   
   constructor(private fb: FormBuilder ,private participantListService:ParticipantListService, private formationListService:FormationListService , private formateurListService:FormateurListService) {
     this.formationForm = this.fb.group({
@@ -289,42 +281,52 @@ export class FormationListeComponent implements OnInit {
     
   }
 
-  openEditModal(index: number) {
+  async openEditModal(index: number) {
     this.isEditMode = true;
     this.selectedIndex = index;
     console.log("selectedIndex:",this.selectedIndex);
     const formation = this.tableData.dataRows[index];
+    this.selectedFormationId = formation[0]; // Stockez l'ID de la formation
+    
+
    // Extract names from table data
    const formateurName = formation[6]; // e.g., "Jean Dupont"
    const domaineName = formation[5];   // e.g., "Informatique"
- 
-   // Find matching formateur ID (if names are stored as "Nom Prénom")
-   const selectedFormateur = this.formateurs.find(
-     f => `${f.nom} ${f.prenom}` === formateurName
-   );
- 
-   // Find matching domaine ID
-   const selectedDomaine = this.domaines.find(
-     d => d.libelle === domaineName
-   );
 
-    // Simulation des participants pour l'édition
-    this.selectedParticipants = this.participants.slice(0, parseInt(formation[8]));
+   // Find matching formateur ID (if names are stored as "Nom Prénom")
+   const selectedFormateur = this.formateurs.find(f => `${f.nom} ${f.prenom}` === formateurName);
+   // Find matching domaine ID
+   const selectedDomaine = this.domaines.find(d => d.libelle === domaineName);
+
+// 2. Chargement des participants existants
+  try {
+    const existingParticipants = await this.formationListService
+      .getFormationParticipants(this.selectedFormationId)
+      .toPromise();
+
+    this.selectedParticipants = existingParticipants || [];
+    this.initialParticipants = [...this.selectedParticipants];
+
     
+    // 3. Initialisation du formulaire
     this.formationForm.patchValue({
-      // id: formation[0],
       titre: formation[1],
       dateDebut: this.formatDateForInput(formation[2]),
       dateFin: this.formatDateForInput(formation[3]),
       duree: formation[4],
-      domaine: selectedDomaine?.id || null,  // Use domaine ID (or null)
-      formateur: selectedFormateur?.id || null, // Use formateur ID (or null)
-      budget: formation[7],
-      participants: this.selectedParticipants.map(p => p.id)
+      domaine: selectedDomaine?.id || null,
+      formateur: selectedFormateur?.id || null,
+      budget: formation[7]
     });
-    console.log("openModal  formation ! ",this.formationForm.value);
+
+    console.log("Participants chargés:", this.selectedParticipants);
     this.showFormationModal = true;
+
+  } catch (error) {
+    console.error("Erreur chargement participants:", error);
+    Swal.fire('Erreur', 'Impossible de charger les participants', 'error');
   }
+}
 
   closeFormationModal() {
     this.showFormationModal = false;
@@ -358,6 +360,31 @@ export class FormationListeComponent implements OnInit {
       console.log("formationData:",formationData);
       const formationId=this.tableData.dataRows[this.selectedIndex][0];;
       console.log("formationId:",formationId);
+      console.log("InitialParticipants:",this.initialParticipants);
+      console.log("SelectedParticipants:",this.selectedParticipants);
+
+      // Création de Set pour simplifier la comparaison
+      const initialIds = new Set(this.initialParticipants.map(p => p.id));
+      const selectedIds = new Set(this.selectedParticipants.map(p => p.id));
+      // Supprimer les participants retirés
+      for (const participantId of initialIds) {
+        if (!selectedIds.has(participantId)) {
+          this.formationListService.removeParticipantFromFormation(formationId, participantId).subscribe({
+            next: () => console.log(`Participant ${participantId} supprimé de la formation`),
+            error: (err) => console.error(`Erreur suppression participant ${participantId}:`, err)
+          });
+        }
+      }
+      // Ajouter les nouveaux participants
+      for (const participantId of selectedIds) {
+        if (!initialIds.has(participantId)) {
+          this.formationListService.addParticipantToFormation(formationId, participantId).subscribe({
+            next: () => console.log(`Participant ${participantId} ajouté à la formation`),
+            error: (err) => console.error(`Erreur ajout participant ${participantId}:`, err)
+          });
+        }
+      }
+
 
       this.formationListService.updateFormation(formationId,formation, formateurId, domaineId).subscribe({
         next: (createdFormation) => {
