@@ -67,7 +67,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="formationId">ID</label>
-                                <input type="text" class="form-control" id="formationId" formControlName="id" [readonly]="isEditMode">
+                                <input type="text" class="form-control" id="formationId" formControlName="id" [readonly]="true">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -104,7 +104,7 @@
                             <div class="form-group">
                                 <label for="formationDomaine">Domaine</label>
                                 <select class="form-control" id="formationDomaine" formControlName="domaine">
-                                    <option *ngFor="let domaine of domaines" [value]="domaine">{{ domaine }}</option>
+                                    <option *ngFor="let domaine of domaines" [value]="domaine.id">{{ domaine.libelle }}</option>
                                 </select>
                             </div>
                         </div>
@@ -112,7 +112,7 @@
                             <div class="form-group">
                                 <label for="formationFormateur">Formateur</label>
                                 <select class="form-control" id="formationFormateur" formControlName="formateur">
-                                    <option *ngFor="let formateur of formateurs" [value]="formateur">{{ formateur }}</option>
+                                    <option *ngFor="let formateur of formateurs" [value]="formateur.id">{{ formateur.nom +  " " + formateur.prenom }}</option>
                                 </select>
                             </div>
                         </div>
@@ -124,7 +124,7 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
+                    <div *ngIf="isEditMode" class="form-group">
                         <label>Participants</label>
                         <div class="card">
                             <div class="card-body p-0">
@@ -211,6 +211,7 @@
                             </li>
                         </ul>
                     </div>
+                    
                 </form>
             </div>
             <div class="modal-footer">
