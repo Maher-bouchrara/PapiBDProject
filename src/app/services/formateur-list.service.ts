@@ -24,4 +24,10 @@ export class FormateurListService {
   deleteFormateur(formateurId: any): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${formateurId}`);
   }
+  getFormateursCount() {
+    return this.http.get<number>(`${this.apiUrl}/count`);
+  }
+  getTopFormateurs() {
+    return this.http.get<any[]>(`${this.apiUrl}/top-3-details`);
+  }
 }

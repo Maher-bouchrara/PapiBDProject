@@ -52,4 +52,15 @@ export class FormationListService {
         `${this.apiUrl}/${formationId}/participants/${participantId}`
       );
     }
+  
+  getFormationsCount() {
+      return this.http.get<number>(`${this.apiUrl}/count`);
+    }
+  // Nouvelle méthode pour récupérer les budgets mensuels top 3 domaines
+  getBudgetsMensuelsTop3(){
+    return this.http.get<any[]>(`${this.apiUrl}/stats/budgets-mensuels-top3`);
+  }
+  getDomainePercentages() {
+    return this.http.get<any[]>(`${this.apiUrl}/stats/domaines`);
+  }
 }
