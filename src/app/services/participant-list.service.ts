@@ -47,7 +47,11 @@ export class ParticipantListService {
       return this.http.put(`${this.apiUrl}/${participantId}`, participantToSend);
     }
 
-    
+  
+  getCount() {
+    return this.http.get<number>(`${this.apiUrl}/count`);
+  }
+}
     
   
-}
+

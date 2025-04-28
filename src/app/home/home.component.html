@@ -55,19 +55,22 @@
         </div>
         <div class="row">
             <div class="col-md-4">
-                <lbd-chart
-                  [title]="'Nombre de formations par domaine'"
-                  [subtitle]="'En pourcentage'"
-                  [chartClass]="'ct-perfect-fourth'"
-                  [chartType]="emailChartType"
-                  [chartData]="emailChartData"
-                  [legendItems]="emailChartLegendItems"
-                  [withHr]="true"
-                  [footerIconClass]="'fa fa-clock-o'"
-                  [footerText]="'Campaign sent 2 days ago'">
-                </lbd-chart>
+                <ng-container *ngIf="chartInitialized">
+                    <lbd-chart
+                      [title]="'Répartition des domaines de formation'"
+                      [subtitle]="'Pourcentage par domaine'"
+                      [chartType]="emailChartType"
+                      [chartData]="emailChartData"
+                      [chartOptions]="emailChartOptions"
+                      [chartResponsive]="emailChartResponsive"
+                      [legendItems]="emailChartLegendItems"
+                      [withHr]="true"
+                      [footerIconClass]="'fa fa-pie-chart'"
+                      [footerText]="'Basé sur les données actuelles'">
+                    </lbd-chart>
+                  </ng-container>
             </div>
-            <div class="col-md-8">
+            <div *ngIf="!loading" class="col-md-8">
                 <lbd-chart
                   [title]="'Budget en DT par domaine en 2025 '"
                   [subtitle]="'Les trois domaines les plus pertinents'"
@@ -92,7 +95,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h4 class="title">Top 3 formateurs  <i class="fa fa-trophy text-warning"></i></h4>
-                                        <p class="category">Les meilleurs formateurs du mois</p>
+                                        <p class="category">Les formateurs ayant les plus grands nombres de formations</p>
                                     </div>
                                 </div>
                             </div>

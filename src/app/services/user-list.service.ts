@@ -25,5 +25,9 @@ export class UserListService {
 
     deleteUser(userId: any): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${userId}`);
+  
+  }
+  getUtilisateursCount() {
+    return this.http.get<number>(`${this.apiUrl}/count`);
   }
 }
