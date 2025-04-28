@@ -42,10 +42,10 @@
                                     <td>{{user.role.nom}}</td>
                                     <td>
                                         <div class="d-flex justify-content-start gap-2">
-                                            <button type="button" class="btn btn-sm btn-info mr-2" (click)="openEditModal(i)">
+                                            <button type="button" class="btn btn-sm btn-info mr-2" (click)="openEditModal(i + (this.currentPage-1)*this.pageSize)">
                                                 <i class="fa fa-edit mr-1"></i> Modifier
                                             </button>
-                                            <button type="button" class="btn btn-sm btn-danger" (click)="deleteUser(i)">
+                                            <button type="button" class="btn btn-sm btn-danger" (click)="deleteUser(i + (this.currentPage-1)*this.pageSize)">
                                                 <i class="fa fa-trash mr-1"></i> Supprimer
                                             </button>
                                         </div>
