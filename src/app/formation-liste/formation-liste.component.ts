@@ -537,26 +537,57 @@ export class FormationListeComponent implements OnInit {
   }
   
   // Méthodes pour l'envoi d'email
-  openEmailModal(index: number) {
+  // openEmailModal(index: number) {
+  //   this.selectedIndex = index;
+  //   this.selectedFormation = this.tableData.dataRows[index];
+    
+  //   // Simulation des destinataires pour l'email
+  //   const nbParticipants = parseInt(this.selectedFormation[8]);
+  //   const destinataires = this.participants.slice(0, nbParticipants);
+  //   console.log("destinataire:",destinataires);
+  //   const formationTitle = this.selectedFormation[1];
+  //   const startDate = this.selectedFormation[2];
+    
+  //   this.emailForm.patchValue({
+  //     objet: `Convocation à la formation "${formationTitle}"`,
+  //     message: `Bonjour,\n\nVous êtes convoqué(e) à la formation "${formationTitle}" qui débutera le ${startDate}.\nVoici le lien google meet de la formation https://meet.google.com/landing\nCordialement,\nLe service formation`,
+  //     destinataires: destinataires.map((p => p.email))
+  //   });
+    
+  //   this.showEmailModal = true;
+  // }
+  
+  async openEmailModal(index: number) {
     this.selectedIndex = index;
     this.selectedFormation = this.tableData.dataRows[index];
-    
-    // Simulation des destinataires pour l'email
-    const nbParticipants = parseInt(this.selectedFormation[8]);
-    const destinataires = this.participants.slice(0, nbParticipants);
+    this.selectedFormationId = this.selectedFormation[0]; // Get the formation ID
 
-    const formationTitle = this.selectedFormation[1];
-    const startDate = this.selectedFormation[2];
-    
-    this.emailForm.patchValue({
-      objet: `Convocation à la formation "${formationTitle}"`,
-      message: `Bonjour,\n\nVous êtes convoqué(e) à la formation "${formationTitle}" qui débutera le ${startDate}.\nVoici le lien google meet de la formation https://meet.google.com/landing\nCordialement,\nLe service formation`,
-      destinataires: destinataires.map((p => p.email))
-    });
-    
-    this.showEmailModal = true;
-  }
-  
+    try {
+        // Fetch participants from server (same as in openEditModal)
+        const existingParticipants = await this.formationListService
+            .getFormationParticipants(this.selectedFormationId)
+            .toPromise();
+
+        this.selectedParticipants = existingParticipants || [];
+        const destinataires = this.selectedParticipants.map(p => p.email);
+        console.log("destinares:",destinataires);
+        
+        const formationTitle = this.selectedFormation[1];
+        const startDate = this.selectedFormation[2];
+        
+        this.emailForm.patchValue({
+            objet: `Convocation à la formation "${formationTitle}"`,
+            message: `Bonjour,\n\nVous êtes convoqué(e) à la formation "${formationTitle}" qui débutera le ${startDate}.\nVoici le lien google meet de la formation https://meet.google.com/landing\nCordialement,\nLe service formation`,
+            destinataires: this.selectedParticipants.map(p => p.email) // Use the fetched participants
+        });
+        
+        this.showEmailModal = true;
+    } catch (error) {
+        console.error("Erreur chargement participants:", error);
+        Swal.fire('Erreur', 'Impossible de charger les participants', 'error');
+    }
+}
+
   closeEmailModal() {
     this.showEmailModal = false;
   }
@@ -611,22 +642,47 @@ export class FormationListeComponent implements OnInit {
 }
   
   // Méthodes pour la génération de certificats
-  openCertificatModal(index: number) {
+  // openCertificatModal(index: number) {
+  //   this.selectedIndex = index;
+  //   this.selectedFormation = this.tableData.dataRows[index];
+    
+  //   // Simulation des participants pour les certificats
+  //   const nbParticipants = parseInt(this.selectedFormation[8]);
+  //   const participantsForCert = this.participants.slice(0, nbParticipants);
+    
+  //   this.certificatForm.patchValue({
+  //     titre: `Certificat de réussite - ${this.selectedFormation[1]}`,
+  //     participants: participantsForCert.map(p => `${p.nom} ${p.prenom}`)
+  //   });
+    
+  //   this.showCertificatModal = true;
+  // }
+  
+  async openCertificatModal(index: number) {
     this.selectedIndex = index;
     this.selectedFormation = this.tableData.dataRows[index];
-    
-    // Simulation des participants pour les certificats
-    const nbParticipants = parseInt(this.selectedFormation[8]);
-    const participantsForCert = this.participants.slice(0, nbParticipants);
-    
-    this.certificatForm.patchValue({
-      titre: `Certificat de réussite - ${this.selectedFormation[1]}`,
-      participants: participantsForCert.map(p => `${p.nom} ${p.prenom}`)
-    });
-    
-    this.showCertificatModal = true;
-  }
-  
+    this.selectedFormationId = this.selectedFormation[0]; // Récupérer l'ID de la formation
+
+    try {
+        // Récupérer les participants depuis le serveur (comme dans openEditModal)
+        const existingParticipants = await this.formationListService
+            .getFormationParticipants(this.selectedFormationId)
+            .toPromise();
+
+        this.selectedParticipants = existingParticipants || [];
+        
+        this.certificatForm.patchValue({
+            titre: `Certificat de réussite - ${this.selectedFormation[1]}`,
+            participants: this.selectedParticipants.map(p => `${p.nom} ${p.prenom}`)
+        });
+        
+        this.showCertificatModal = true;
+    } catch (error) {
+        console.error("Erreur lors du chargement des participants:", error);
+        Swal.fire('Erreur', 'Impossible de charger les participants', 'error');
+    }
+}
+
   closeCertificatModal() {
     this.showCertificatModal = false;
   }

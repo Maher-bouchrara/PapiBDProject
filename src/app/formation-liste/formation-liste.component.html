@@ -206,7 +206,7 @@
                     <div class="form-group">
                         <label>Destinataires</label>
                         <ul class="list-group">
-                            <li *ngFor="let participant of participants.slice(0,selectedFormation ? selectedFormation[8] : '0')" class="list-group-item">
+                            <li *ngFor="let participant of this.selectedParticipants" class="list-group-item">
                                 {{ participant.prenom }} {{ participant.nom }} ({{ participant.email }})
                             </li>
                         </ul>
@@ -248,7 +248,7 @@
                     <div class="form-group">
                         <label>Participants qui recevront un certificat</label>
                         <ul class="list-group">
-                            <li *ngFor="let participant of participants.slice(0, selectedFormation ? selectedFormation[8] : '0')" class="list-group-item">
+                            <li *ngFor="let participant of  this.selectedParticipants" class="list-group-item">
                                 {{ participant.prenom }} {{ participant.nom }} ({{ participant.email }})
                             </li>
                         </ul>
