@@ -457,7 +457,7 @@ export class FormationListeComponent implements OnInit {
           // Notification de succès
           Swal.fire({
             title: 'Succès!',
-            text: 'La formation a été créée avec succès.',
+            text: 'La formation a été modifiée avec succès.',
             icon: 'success',
             confirmButtonText: 'OK',
             confirmButtonColor: '#3085d6'
@@ -474,7 +474,7 @@ export class FormationListeComponent implements OnInit {
             title: 'Erreur!',
             html: `
               <div style="text-align: left;">
-                <p>La création a échoué pour les raisons suivantes :</p>
+                <p>La modification a échoué pour les raisons suivantes :</p>
                 <ul>
                   <li>${err.error?.message || 'Erreur serveur'}</li>
                   ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}

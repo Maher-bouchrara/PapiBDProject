@@ -2,6 +2,7 @@ import { Component, OnInit , } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FormateurListService } from 'app/services/formateur-list.service'; 
 import { EmployeurService } from 'app/services/employeur.service';
+import Swal from 'sweetalert2';
 
 declare interface TableData {
   headerRow: string[];
@@ -20,6 +21,12 @@ export class FormateurListComponent implements OnInit {
   public isEditMode: boolean = false;
   public selectedFormateurIndex: number = -1;
   public selectedFormateur: string[] = null;
+
+  // Pagination
+  public filteredFormateurs: any[] = [];
+  public pageSize: number = 5;
+  public currentPage: number = 1;
+  // fin -  Pagination
   
   // Variables pour contrôler l'affichage des modals
   public showFormateurModal: boolean = false;
@@ -29,8 +36,12 @@ export class FormateurListComponent implements OnInit {
   constructor(private formBuilder: FormBuilder , private formateurService:FormateurListService, private employeurService:EmployeurService) { }
 
   ngOnInit() {
+    // Pagination
+    const savedPage = localStorage.getItem('formateursListCurrentPage');
+    this.currentPage = savedPage ? parseInt(savedPage) : 1; 
+    // Fin - Pagination
     let data: string[][] = [];
-    this.loadEmployeurs();
+    this.loadEmployeurs()
     this.formateurService.getAllFormateurs().subscribe({
       next: (res) => {
         console.log('Formateurs fetched:', res);
@@ -42,7 +53,7 @@ export class FormateurListComponent implements OnInit {
           String(formateur.email),
           String(formateur.tel),
           String(formateur.type),
-          String(formateur.employeur )
+          String(formateur.employeur)
         ]);
         console.log("data = ", data);
       },
@@ -121,7 +132,7 @@ export class FormateurListComponent implements OnInit {
       email: formateurData.email,
       tel: formateurData.tel,
       type: formateurData.type,
-      employeur: formateurData.employeur
+      employeur: formateurData.employeur.id
     });
     
     this.showFormateurModal = true;
@@ -155,39 +166,89 @@ export class FormateurListComponent implements OnInit {
       this.formateurService.updateFormateur(formValues.id, formateurData2).subscribe({
         next: (updatedFormateur) => {
           console.log('Formateur updated:', updatedFormateur);
+          Swal.fire({
+                      title: 'Succès!',
+                      text: 'Formateur mis à jour avec succès.',
+                      icon: 'success',
+                      confirmButtonText: 'OK',
+                      confirmButtonColor: '#3085d6'
+                    });
           this.loadFormateurs(); // Refresh the formateur list
           this.showFormateurModal = false;
         },
         error: (err) => {
           console.error('Error updating formateur:', err);
-        }
-      });
-    } else {
+       Swal.fire({
+                   title: 'Erreur!',
+                   html: `
+                     <div style="text-align: left;">
+                       <p>La modification a échoué pour les raisons suivantes :</p>
+                       <ul>
+                         <li>${err.error?.message || 'Erreur serveur'}</li>
+                         ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                       </ul>
+                     </div>
+                   `,
+                   icon: 'error',
+                   confirmButtonText: 'Compris',
+                   confirmButtonColor: '#d33'
+                 });
+               }
+             });
+            } else {
       // Add new formateur
       this.formateurService.createFormateur(formateurData, employeurId).subscribe({
         next: (createdFormateur) => {
           console.log('Formateur created:', createdFormateur);
+           Swal.fire({
+                      title: 'Succès!',
+                      text: 'Le formateur a été créé avec succès.',
+                      icon: 'success',
+                      confirmButtonText: 'OK',
+                      confirmButtonColor: '#3085d6'
+                    });
           this.loadFormateurs(); // Refresh the formateur list
           this.showFormateurModal = false;
         },
         error: (err) => {
           console.error('Error creating formateur:', err);
-        }
-      });
-
-    }
+         Swal.fire({
+                    title: 'Erreur!',
+                    html: `
+                      <div style="text-align: left;">
+                        <p>La création a échoué pour les raisons suivantes :</p>
+                        <ul>
+                          <li>${err.error?.message || 'Erreur serveur'}</li>
+                          ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                        </ul>
+                      </div>
+                    `,
+                    icon: 'error',
+                    confirmButtonText: 'Compris',
+                    confirmButtonColor: '#d33'
+                  });
+                }
+              });
+            }
     
     // Close modal
     this.showFormateurModal = false;
     this.formateurForm.reset();
   }
-
+  ngOnDestroy() {
+    // Save current page when component is destroyed
+    localStorage.setItem('formateursListCurrentPage', this.currentPage.toString());
+  }
   // Add this method to refresh formateur data
   loadFormateurs() {
     this.formateurService.getAllFormateurs().subscribe({
       next: (res) => {
         console.log('Formateurs fetched:', res);
         this.formateurs = res;
+        // Pagination
+        this.filteredFormateurs = res;
+        // this.currentPage = 1; // Reset to first page
+        // Fin - Pagination
         this.tableData1.dataRows = res.map((formateur: any) => [
           String(formateur.id),
           String(formateur.nom),
@@ -203,7 +264,24 @@ export class FormateurListComponent implements OnInit {
       }
     });
   }
+  onSearchChange(searchTerm: string) {
+    this.filteredFormateurs = this.formateurs.filter(user =>
+      user.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.prenom.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    this.currentPage = 1;
+  }
 
+  onPageChange(page: number) {
+    this.currentPage = page;
+    localStorage.setItem('formateursListCurrentPage', page.toString());
+
+  }
+  
+  paginatedFormateurs() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.filteredFormateurs.slice(startIndex, startIndex + this.pageSize);
+  }
   deleteFormateur(index: number) {
     // 1. Vérifiez que l'index est valide
     if (!this.tableData1?.dataRows || index < 0 || index >= this.tableData1.dataRows.length) {
@@ -234,11 +312,25 @@ export class FormateurListComponent implements OnInit {
     this.showDeleteModal = false;
     this.selectedFormateurIndex = -1;
     this.selectedFormateur = null;
+
+    Swal.fire({
+              title: 'Succès !',
+              text: 'Formateur supprimé avec succès.',
+              icon: 'success',
+              confirmButtonText: 'OK'
+            });
+          
   },
   error: (err) => {
     console.error('Error deleting formateur:', err);
-  }
-});
+  Swal.fire({
+           title: 'Erreur !',
+           text: 'Suppression impossible du formateur',
+           icon: 'error',
+           confirmButtonText: 'OK'
+         });
+       }
+     });
 }
 
   closeFormateurModal() {
