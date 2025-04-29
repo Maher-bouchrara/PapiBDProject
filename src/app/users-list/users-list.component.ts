@@ -1,6 +1,7 @@
 import { Component, OnInit ,AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { UserListService } from 'app/services/user-list.service'; 
+import Swal from 'sweetalert2';
 
 declare interface TableData {
   headerRow: string[];
@@ -141,11 +142,33 @@ export class UsersListComponent implements OnInit {
       // Update existing user
       this.userService.updateUser(formValues.id, userData, roleId).subscribe({
         next: (updatedUser) => {
+          Swal.fire({
+            title: 'Succès!',
+            text: 'Utilisateur modifié avec succès.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6'
+          });
           console.log('User updated:', updatedUser);
           this.loadUsers(); // Refresh the user list
           this.showUserModal = false;
         },
         error: (err) => {
+          Swal.fire({
+            title: 'Erreur!',
+            html: `
+              <div style="text-align: left;">
+                <p>La modification a échoué pour les raisons suivantes :</p>
+                <ul>
+                  <li>${err.error?.message || 'Erreur serveur'}</li>
+                  ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                </ul>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonText: 'Compris',
+            confirmButtonColor: '#d33'
+          });
           console.error('Error updating user:', err);
         }
       });
@@ -153,11 +176,33 @@ export class UsersListComponent implements OnInit {
       // Add new user
       this.userService.createUser(userData, roleId).subscribe({
         next: (createdUser) => {
+          Swal.fire({
+            title: 'Succès!',
+            text: 'Utilisateur créé avec succès.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6'
+          });
           console.log('User created:', createdUser);
           this.loadUsers(); // Refresh the user list
           this.showUserModal = false;
         },
         error: (err) => {
+          Swal.fire({
+            title: 'Erreur!',
+            html: `
+              <div style="text-align: left;">
+                <p>La création a échoué pour les raisons suivantes :</p>
+                <ul>
+                  <li>${err.error?.message || 'Erreur serveur'}</li>
+                  ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                </ul>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonText: 'Compris',
+            confirmButtonColor: '#d33'
+          });
           console.error('Error creating user:', err);
         }
       });
@@ -229,6 +274,12 @@ export class UsersListComponent implements OnInit {
     
     this.userService.deleteUser(userId).subscribe({
       next: () => {
+        Swal.fire({
+          title: 'Succès !',
+          text: 'Utilisateur supprimé avec succès.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
         this.loadUsers();
         // Close modal
         this.showDeleteModal = false;
@@ -236,6 +287,12 @@ export class UsersListComponent implements OnInit {
         this.selectedUser = null;
       },
       error: (err) => {
+        Swal.fire({
+          title: 'Erreur !',
+          text: 'Suppression impossible : ' + (err.error?.message),
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
         console.error('Error deleting user:', err);
       }
     });
