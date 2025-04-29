@@ -249,7 +249,7 @@ export class HomeComponent implements OnInit {
         low: 0,
         high: 10000,
         ticks: [0, 2000, 4000, 6000, 8000, 10000],
-        labelInterpolationFnc: (value: any) => `${value} DT`
+        labelInterpolationFnc: (value: any) => `${value}`
       },
       height: '300px'
     };
@@ -310,7 +310,7 @@ export class HomeComponent implements OnInit {
         low: 0,
         high: 10000,               // Échelle fixe jusqu'à 10000 DT
         ticks: [0, 2000, 4000, 6000, 8000, 10000], // Graduations de l'axe Y
-        labelInterpolationFnc: (value: any) => `${value} DT` // Formatage des valeurs
+        labelInterpolationFnc: (value: any) => `${value}` // Formatage des valeurs
       },
       height: '300px'             // Hauteur fixe du graphique
     };
