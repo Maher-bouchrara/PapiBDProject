@@ -25,7 +25,7 @@ export class FormationListeComponent implements OnInit {
   public selectedFormationId : any;
   // Variables pour la table
   tableData = {
-    headerRow: ['ID', 'Titre', 'Date Début', 'Date Fin', 'Durée (jours)', 'Domaine', 'Formateur', 'Budget (€)', 'Participants'],
+    headerRow: ['ID', 'Titre', 'Date Début', 'Date Fin', 'Durée (jours)', 'Domaine', 'Formateur', 'Budget (DT)', 'Participants'],
     dataRows: []
   };
 
