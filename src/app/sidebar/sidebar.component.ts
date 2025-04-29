@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from 'app/services/auth.service';
+import { data } from 'jquery';
+
 
 declare const $: any;
 declare interface RouteInfo {
@@ -28,11 +31,44 @@ export const ROUTES: RouteInfo[] = [
 })
 export class SidebarComponent implements OnInit {
   menuItems: any[];
-
-  constructor() { }
+  connectedUserId: number;
+  connectedRoleId: number;
+  constructor(private authService:AuthService) { }
 
   ngOnInit() {
     this.menuItems = ROUTES.filter(menuItem => menuItem);
+    
+    this.authService.getUserId().subscribe({
+      next: (data) =>{
+        this.connectedUserId = data.userId;
+        console.log("connectedUserId: ",this.connectedUserId);
+      },
+      error: (err) => {
+        console.error('Error fetching users:', err);
+      }
+    });
+
+    this.authService.getRoleId().subscribe({
+      next: (data) =>{
+        this.connectedRoleId = data.roleId;
+        console.log("connectedRoleId: ",this.connectedRoleId);
+        this.filterRoutesByRole(this.connectedRoleId); // filtrage ici
+      },
+      error: (err) => {
+        console.error('Error fetching users:', err);
+      }
+    });
+  }
+  filterRoutesByRole(roleId: number) {
+    if (roleId === 1) {
+      this.menuItems = ROUTES; // Admin: tout
+    } else if (roleId === 2) {
+      this.menuItems = ROUTES.filter(item => item.path !== '/user-list');
+    } else if (roleId === 3) {
+      this.menuItems = ROUTES.filter(item => item.path !== '/user-list' && item.path !== '/dashboard');
+    } else {
+      this.menuItems = []; // Aucun accès
+    }
   }
   isMobileMenu() {
       if ($(window).width() > 991) {

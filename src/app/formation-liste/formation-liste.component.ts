@@ -15,6 +15,12 @@ import Swal from 'sweetalert2';
 })
 export class FormationListeComponent implements OnInit {
 
+    // Pagination
+    public filteredFormations: any[] = [];
+    public pageSize: number = 5;
+    public currentPage: number = 1;
+    // fin -  Pagination
+
   public formations : any;
   public selectedFormationId : any;
   // Variables pour la table
@@ -80,6 +86,8 @@ export class FormationListeComponent implements OnInit {
   ngOnInit() {
     // Initialisation des données si nécessaire
     // Pagination
+    const savedPage = localStorage.getItem('FormationListCurrentPage');
+    this.currentPage = savedPage ? parseInt(savedPage) : 1; 
     // Fin - Pagination 
     this.participantListService.getAllParticipant().subscribe({
       next: (res)=>{
@@ -197,6 +205,13 @@ export class FormationListeComponent implements OnInit {
       }
     })
   }
+  //Pagination
+  ngOnDestroy() {
+    // Save current page when component is destroyed
+    localStorage.setItem('FormationListCurrentPage', this.currentPage.toString());
+  }
+  //Fin - Pagination
+
 
   ngAfterViewInit(){
     this.loadFormations();
@@ -208,6 +223,10 @@ export class FormationListeComponent implements OnInit {
       next: async (res)=>{
         console.log('Formations fetched:', res);
         this.formations = res ;
+                // Pagination
+                this.filteredFormations = res;
+                // this.currentPage = 1; // Reset to first page
+                // Fin - Pagination
         data = await Promise.all(res.map(async (formation: any) => {
           // Helper function to safely convert to string with fallback to empty string
           const safeString = (value: any) => (value !== null && value !== undefined) ? String(value) : '';
@@ -276,6 +295,43 @@ export class FormationListeComponent implements OnInit {
       }
     })
   }
+
+  //Pagination
+  onSearchChange(searchTerm: string) {
+    const term = searchTerm.toLowerCase().trim();
+    console.log("paginationFormat",    this.paginatedFormations());
+    this.filteredFormations = !term 
+      ? [...this.formations]
+      : this.formations.filter(formation => {
+          const formateurNomComplet = formation.formateur 
+            ? `${formation.formateur.nom || ''} ${formation.formateur.prenom || ''}`.toLowerCase()
+            : '';
+            
+          const domaineLibelle = formation.domaine?.libelle?.toLowerCase() || '';
+          console.log("rech",)
+          return (
+            formation.titre?.toLowerCase().includes(term) ||
+            formateurNomComplet.includes(term) ||
+            domaineLibelle.includes(term) ||
+            formation.date?.toString().includes(term) ||
+            formation.duree?.toString().includes(term) ||
+            formation.budget?.toString().includes(term)
+          );
+        });
+    console.log("filteredFormations:",this.filteredFormations);
+    this.currentPage = 1;
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    localStorage.setItem('FormationListCurrentPage', page.toString());
+  }
+  
+  paginatedFormations() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.tableData.dataRows.slice(startIndex, startIndex + this.pageSize);
+  }
+  //Fin - Pagination
   // Méthodes pour la gestion des formations
   openAddModal() {
     this.isEditMode = false;
@@ -287,9 +343,12 @@ export class FormationListeComponent implements OnInit {
   }
 
   async openEditModal(index: number) {
+    console.log("paginatedFormations:")
     this.isEditMode = true;
     this.selectedIndex = index;
     console.log("selectedIndex:",this.selectedIndex);
+    console.log("currentPage",this.currentPage);
+
     const formation = this.tableData.dataRows[index];
     this.selectedFormationId = formation[0]; // Stockez l'ID de la formation
     
@@ -536,27 +595,6 @@ export class FormationListeComponent implements OnInit {
     });
   }
   
-  // Méthodes pour l'envoi d'email
-  // openEmailModal(index: number) {
-  //   this.selectedIndex = index;
-  //   this.selectedFormation = this.tableData.dataRows[index];
-    
-  //   // Simulation des destinataires pour l'email
-  //   const nbParticipants = parseInt(this.selectedFormation[8]);
-  //   const destinataires = this.participants.slice(0, nbParticipants);
-  //   console.log("destinataire:",destinataires);
-  //   const formationTitle = this.selectedFormation[1];
-  //   const startDate = this.selectedFormation[2];
-    
-  //   this.emailForm.patchValue({
-  //     objet: `Convocation à la formation "${formationTitle}"`,
-  //     message: `Bonjour,\n\nVous êtes convoqué(e) à la formation "${formationTitle}" qui débutera le ${startDate}.\nVoici le lien google meet de la formation https://meet.google.com/landing\nCordialement,\nLe service formation`,
-  //     destinataires: destinataires.map((p => p.email))
-  //   });
-    
-  //   this.showEmailModal = true;
-  // }
-  
   async openEmailModal(index: number) {
     this.selectedIndex = index;
     this.selectedFormation = this.tableData.dataRows[index];
@@ -640,23 +678,7 @@ export class FormationListeComponent implements OnInit {
     }
   }, 800);  // Mise à jour tous les 500ms
 }
-  
-  // Méthodes pour la génération de certificats
-  // openCertificatModal(index: number) {
-  //   this.selectedIndex = index;
-  //   this.selectedFormation = this.tableData.dataRows[index];
-    
-  //   // Simulation des participants pour les certificats
-  //   const nbParticipants = parseInt(this.selectedFormation[8]);
-  //   const participantsForCert = this.participants.slice(0, nbParticipants);
-    
-  //   this.certificatForm.patchValue({
-  //     titre: `Certificat de réussite - ${this.selectedFormation[1]}`,
-  //     participants: participantsForCert.map(p => `${p.nom} ${p.prenom}`)
-  //   });
-    
-  //   this.showCertificatModal = true;
-  // }
+
   
   async openCertificatModal(index: number) {
     this.selectedIndex = index;
