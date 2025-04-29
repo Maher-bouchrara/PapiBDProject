@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ParticipantListService } from 'app/services/participant-list.service';
+import Swal from 'sweetalert2';
 
 declare interface TableData {
   headerRow: string[];
@@ -13,6 +14,12 @@ declare interface TableData {
   styleUrls: ['./participant-list.component.css']
 })
 export class ParticipantListComponent implements OnInit {
+    // Pagination
+    public filteredParticipants: any[] = [];
+    public pageSize: number = 5;
+    public currentPage: number = 1;
+    // fin -  Pagination
+
   public tableData1: TableData;
   public userForm: FormGroup;
   public isEditMode: boolean = false;
@@ -38,6 +45,10 @@ export class ParticipantListComponent implements OnInit {
 
   
   ngOnInit() {
+    // Pagination
+    const savedPage = localStorage.getItem('participantsListCurrentPage');
+    this.currentPage = savedPage ? parseInt(savedPage) : 1; 
+    // Fin - Pagination
     let data: string[][] = [];
     this.participantService.getAllParticipant().subscribe({
       next: (res) => {
@@ -77,6 +88,11 @@ export class ParticipantListComponent implements OnInit {
     this.initForm();
   }
 
+  ngOnDestroy() {
+    // Save current page when component is destroyed
+    localStorage.setItem('participantsListCurrentPage', this.currentPage.toString());
+  }
+
   ngAfterViewInit(){
     this.loadParticipants();
   }
@@ -111,15 +127,15 @@ export class ParticipantListComponent implements OnInit {
     this.isEditMode = true;
     this.selectedUserIndex = index;
     const userData = this.participants[index]
-
+    console.log("userData",userData); 
     this.userForm.patchValue({
       id: userData.id,
       nom: userData.nom,
       prenom: userData.prenom,
-      structure: userData.structure,
-      profile: userData.profile,
+      structure: userData.structure.id,
+      profile: userData.profile.id,
       email: userData.email,
-      telephone: userData.telephone
+      telephone: userData.tel
     });
 
     this.showUserModal = true;
@@ -148,12 +164,36 @@ export class ParticipantListComponent implements OnInit {
       // Update existing user
       this.participantService.updateParticipant(formValues.id, newParticipant).subscribe({
         next: (updatedUser) => {
+          // Notification de succès
+          Swal.fire({
+            title: 'Succès!',
+            text: 'Le participant a été modifié avec succès.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6'
+          });
           console.log('User updated:', updatedUser);
           this.loadParticipants(); // Refresh the user list
+          console.log("this.participants(aprés modification):",this.participants);
           this.showUserModal = false;
         },
         error: (err) => {
           console.error('Error updating user:', err);
+          Swal.fire({
+            title: 'Erreur!',
+            html: `
+              <div style="text-align: left;">
+                <p>La modification a échoué pour les raisons suivantes :</p>
+                <ul>
+                  <li>${err.error?.message || 'Erreur serveur'}</li>
+                  ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                </ul>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonText: 'Compris',
+            confirmButtonColor: '#d33'
+          });
         }
       });
     } else
@@ -176,6 +216,14 @@ export class ParticipantListComponent implements OnInit {
       this.participantService.createParticipant(newParticipant, profileId, structureId)
       .subscribe(
         (response) => {
+          // Notification de succès
+          Swal.fire({
+            title: 'Succès!',
+            text: 'Le particiant a été créé avec succès.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#3085d6'
+          }); 
           console.log('Participant créé avec succès', response);
           this.closeUserModal();
           this.userForm.reset();
@@ -183,8 +231,23 @@ export class ParticipantListComponent implements OnInit {
            // Actualiser la liste des participants
            this.loadParticipants();
         },
-        (error) => {
-          console.error('Erreur lors de la création du participant', error);
+        (err) => {
+          console.error('Erreur lors de la création du participant', err);
+          Swal.fire({
+            title: 'Erreur!',
+            html: `
+              <div style="text-align: left;">
+                <p>La création a échoué pour les raisons suivantes :</p>
+                <ul>
+                  <li>${err.error?.message || 'Erreur serveur'}</li>
+                  ${err.error?.errors?.map(e => `<li>${e}</li>`).join('') || ''}
+                </ul>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonText: 'Compris',
+            confirmButtonColor: '#d33'
+          });
         }
       );
   }}
@@ -192,6 +255,19 @@ export class ParticipantListComponent implements OnInit {
     this.participantService.getAllParticipant().subscribe(
       (data) => {
         this.participants = data; // Mettre à jour le tableau des participants
+        // Pagination
+        this.filteredParticipants = data;
+        // this.currentPage = 1; // Reset to first page
+        // Fin - Pagination
+        this.tableData1.dataRows = data.map((participant:any)=>[
+          String(participant.id),
+          String(participant.nom),
+          String(participant.prenom),
+          String(participant.structure?.libelle ), 
+          String(participant.profile?.libelle ),
+          String(participant.email),
+          String(participant.tel)
+        ])
       },
       (error) => {
         console.error('Erreur lors du chargement des participants:', error);
@@ -199,12 +275,35 @@ export class ParticipantListComponent implements OnInit {
     );
   }
 
+  // Pagination
+  
+  onSearchChange(searchTerm: string) {
+    this.filteredParticipants = this.participants.filter(participant =>
+      participant.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      participant.prenom.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    this.currentPage = 1;
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    localStorage.setItem('participantsListCurrentPage', page.toString());
+
+  }
+  
+  paginatedUsers() {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.filteredParticipants.slice(startIndex, startIndex + this.pageSize);
+  }
+  // Fin - Pagination
+
 
   deleteParticipant(index: number) {
     this.selectedUserIndex = index;
+    console.log("selectedParticipantIndex!", this.selectedUserIndex);
     this.selectedUser = this.tableData1.dataRows[index];
-    this.showDeleteModal = true;
     console.log("selectedParticipant!", this.selectedUser);
+    this.showDeleteModal = true;
   }
   
   confirmDelete() {
@@ -214,15 +313,25 @@ export class ParticipantListComponent implements OnInit {
     // Effectuer la suppression
     this.participantService.deleteParticipant(participantId).subscribe({
       next: () => {
-        // Mettre à jour la liste des participants après suppression
+        Swal.fire({
+          title: 'Succès !',
+          text: 'Participant supprimé avec succès.',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
         this.loadParticipants(); // Recharger les participants
-        console.log('teeeeeeeeeessssssssssssssssssst:');
-        // Si le participant supprimé était dans la liste, réactualiser la sélection
-        this.showDeleteModal = false; // Fermer la modale de confirmation
+        // Close modal
+        this.showDeleteModal = false;
         this.selectedUserIndex = -1;
         this.selectedUser = null;
       },
       error: (err) => {
+        Swal.fire({
+          title: 'Erreur !',
+          text: 'Suppression impossible : ' + (err.error?.message),
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
         console.error('Error deleting user:', err);
       }
     });
