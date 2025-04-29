@@ -105,9 +105,10 @@ export class UsersListComponent implements OnInit {
 
   openEditModal(index: number) {
     this.isEditMode = true;
-    this.selectedUserIndex = index;
+    this.selectedUserIndex =index;
     const userData = this.users[index];
-    
+    console.log("SelectedIndex:",this.selectedUserIndex);
+    console.log("currentPage",this.currentPage);
     this.userForm.patchValue({
       id: userData.id,
       login: userData.login,

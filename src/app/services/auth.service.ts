@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -14,6 +14,24 @@ export class AuthService {
     return this.http.post<{token: string}>(this.apiUrl, credentials);
   }
   
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  }
+
+  getUserId(): Observable<{ userId: number }> {
+    return this.http.get<{ userId: number }>(`${this.apiUrl}/userId`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getRoleId(): Observable<{ roleId: number }> {
+    return this.http.get<{ roleId: number }>(`${this.apiUrl}/roleId`, {
+      headers: this.getAuthHeaders()
+    });
+  }
   saveToken(token: string) {
     localStorage.setItem('jwt', token);
   }

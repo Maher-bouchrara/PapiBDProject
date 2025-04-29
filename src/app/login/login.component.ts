@@ -1,5 +1,5 @@
 // login.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'app/services/auth.service';
 import Swal from 'sweetalert2';
@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   username: string = '';
   password: string = '';
   rememberMe: boolean = false;
@@ -20,11 +20,14 @@ export class LoginComponent {
 
   constructor(private authService: AuthService, private router: Router) {}
 
+  ngOnInit(): void {
+    localStorage.clear()
+  }
   onLogin() {
     this.authService.login(this.credentials).subscribe({
       next: (response) => {
         localStorage.setItem('token', response.token);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/formation-liste']);
       },
       error: (err) => {
         if (err.status === 500 || err.status === 0) {

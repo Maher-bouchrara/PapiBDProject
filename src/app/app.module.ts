@@ -23,6 +23,7 @@ import { FormationListeComponent } from './formation-liste/formation-liste.compo
 import { ParticipantListComponent } from './participant-list/participant-list.component';
 import { SearchPaginationComponent } from './search-pagination/search-pagination.component';
 import { EmployeurListComponent } from './employeur-list/employeur-list.component';
+import { NotAuthorizedComponent } from './not-authorized/not-authorized.component';
 
 @NgModule({
   imports: [
@@ -47,6 +48,7 @@ import { EmployeurListComponent } from './employeur-list/employeur-list.componen
     ParticipantListComponent,
     SearchPaginationComponent,
     EmployeurListComponent,
+    NotAuthorizedComponent,
 ],
   providers: [{ provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }],
   bootstrap: [AppComponent]

@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 import { HomeComponent } from '../../home/home.component';
 import { UserComponent } from '../../user/user.component';
-
+import { NotAuthorizedComponent } from 'app/not-authorized/not-authorized.component';
 import { TablesComponent } from '../../tables/tables.component';
 import { TypographyComponent } from '../../typography/typography.component';
 import { IconsComponent } from '../../icons/icons.component';
@@ -17,19 +17,23 @@ import { AuthGuard } from 'app/guards/auth.guard';
 import { EmployeurListComponent } from 'app/employeur-list/employeur-list.component';
 
 export const AdminLayoutRoutes: Routes = [
-    { path: 'dashboard',      component: HomeComponent ,canActivate: [AuthGuard]},
+    { path: 'dashboard',      component: HomeComponent ,canActivate: [AuthGuard] , data: { roles: [1, 2] }},
     { path: 'user',           component: UserComponent  ,canActivate: [AuthGuard]},
 
-    { path: 'user-list',           component: UsersListComponent  ,canActivate: [AuthGuard]},
-    { path: 'participant-list',           component: ParticipantListComponent  ,canActivate: [AuthGuard]},
+    { path: 'user-list',           component: UsersListComponent  ,canActivate: [AuthGuard],    data: { roles: [1] } },
+    { path: 'participant-list',           component: ParticipantListComponent  ,canActivate: [AuthGuard], data: { roles: [1, 2, 3]}},
     { path: 'table',          component: TablesComponent  ,canActivate: [AuthGuard]},
     { path: 'typography',     component: TypographyComponent  ,canActivate: [AuthGuard]},
     { path: 'icons',          component: IconsComponent  ,canActivate: [AuthGuard]},
     { path: 'maps',           component: MapsComponent  ,canActivate: [AuthGuard]},
     { path: 'notifications',  component: NotificationsComponent  ,canActivate: [AuthGuard]},
     { path: 'upgrade',        component: UpgradeComponent  ,canActivate: [AuthGuard]},
-    {path: 'formateur-list', component:FormateurListComponent ,canActivate: [AuthGuard]},
-    {path: 'formation-liste', component:FormationListeComponent ,canActivate: [AuthGuard]},
-    { path: 'participant-list',           component: ParticipantListComponent  ,canActivate: [AuthGuard]},
-    { path: 'employeur-list',           component: EmployeurListComponent  ,canActivate: [AuthGuard]},
+    {path: 'formateur-list', component:FormateurListComponent ,canActivate: [AuthGuard], data: { roles: [1, 2, 3]}},
+    {path: 'formation-liste', component:FormationListeComponent ,canActivate: [AuthGuard], data: { roles: [1, 2, 3]}},
+    { path: 'participant-list',           component: ParticipantListComponent  ,canActivate: [AuthGuard], data: { roles: [1, 2, 3]}},
+    { path: 'employeur-list',           component: EmployeurListComponent  ,canActivate: [AuthGuard], data: { roles: [1, 2, 3]}},
+    {
+        path: 'not-authorized',
+        component: NotAuthorizedComponent
+      }
 ];
